@@ -48,7 +48,7 @@
     "brand": "KONG",
     "category": "toys",
     "chewy_url": "",
-    "name": "KONG Classic",
+    "name": "Classic Stuffable Dog Toy",
     "notes": "Durable chew / enrichment toy",
     "package_size": "Medium; one toy",
     "species": "dog",
@@ -291,7 +291,7 @@
     "category": "food",
     "chewy_url": "",
     "name": "Grilled Seafood Wet Cat Food Variety Pack",
-    "notes": "Seafood variety pack. Check the included recipes and current labels; this is not the former seafood-and-chicken entry.",
+    "notes": "Seafood variety pack. Check the included recipes and current ingredient labels before feeding.",
     "package_size": "24 cans, 3 oz each",
     "species": "cat",
     "id": 27
@@ -320,7 +320,7 @@
   },
   {
     "id": 30,
-    "name": "Safari Double Row Flea Comb",
+    "name": "Double Row Flea Comb",
     "brand": "Safari by Coastal",
     "species": "dog",
     "category": "flea-tick",

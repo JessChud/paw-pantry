@@ -14,3 +14,25 @@ header img.pet-friends { position: absolute; top: 10px; width: 140px; height: au
   .pet-friends-left { left: 0; }
   .pet-friends-right { right: 0; }
 }
+
+/* Side decorations only appear when the page has roomy outer margins. */
+@media (min-width: 1000px) {
+  .pet-section { position: relative; }
+  .pet-section::before, .pet-section::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 84px;
+    height: 84px;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+  .pet-section::before { left: -128px; background-image: var(--pet-left); transform: translateY(-50%) rotate(-8deg); }
+  .pet-section::after { right: -128px; background-image: var(--pet-right); transform: translateY(-50%) rotate(8deg); }
+  .pet-section:nth-of-type(1) { --pet-left: url('/static/pets/dog.svg'); --pet-right: url('/static/pets/cat.svg'); }
+  .pet-section:nth-of-type(2) { --pet-left: url('/static/pets/rabbit.svg'); --pet-right: url('/static/pets/bird.svg'); }
+  .pet-section:nth-of-type(3) { --pet-left: url('/static/pets/fish.svg'); --pet-right: url('/static/pets/reptile.svg'); }
+  .pet-section:nth-of-type(4) { --pet-left: url('/static/pets/hamster.svg'); --pet-right: url('/static/pets/dog.svg'); }
+}

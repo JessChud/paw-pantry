@@ -310,7 +310,10 @@ def public_catalog(q: str = Query(default="", max_length=200),
             if source.get("url"):
                 links.append(f'<a class="link" rel="noopener" href="{escape(source["url"], quote=True)}">Product information (not an affiliate link)</a>')
             links.append('<p class="pending">Affiliate purchase link not available yet.</p>')
-        cards.append(f'<article id="product-{p.id}"><p class="tag">{escape(p.species)} · {escape(p.category)}</p>'
+        pet_icon = p.species if p.species in {"dog", "cat", "rabbit", "fish", "bird", "hamster", "reptile"} else "paw"
+        cards.append(f'<article id="product-{p.id}"><p class="tag">'
+                     f'<img class="pet-icon" src="/static/pets/{pet_icon}.svg" width="38" height="38" alt="" aria-hidden="true" loading="lazy">'
+                     f'{escape(p.species)} · {escape(p.category)}</p>'
                      f'<h2>{escape(p.brand)} {escape(p.name)}</h2>'
                      f'<p>{escape(p.package_size)}</p><p>{escape(p.notes)}</p>{"".join(links)}</article>')
     def options(values, selected, label):

@@ -1,1 +1,277 @@
-[{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Blue Buffalo","category":"food","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Life Protection Formula Chicken & Brown Rice 5 lb","notes":"Everyday adult dry food","package_size":"5 lb bag","species":"dog"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Purina","category":"food","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Pro Plan Sensitive Skin & Stomach Salmon 5 lb","notes":"Good pick for sensitive stomachs; salmon-based, no chicken","package_size":"5 lb bag","species":"dog"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Greenies","category":"treats","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Original Teenie Dental Treats 48 oz","notes":"VOHC-accepted dental treats","package_size":"48 oz tub","species":"dog"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Zuke's","category":"treats","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Mini Naturals Chicken 6 oz","notes":"Soft training treats, contains chicken","package_size":"6 oz bag","species":"dog"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"KONG","category":"toys","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"KONG Classic","notes":"Durable chew / enrichment toy","package_size":"one toy","species":"dog"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Earth Rated","category":"supplies","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Poop Bags 270 ct","notes":"Lavender-scented, runs out fast in multi-dog homes","package_size":"270 bags","species":"dog"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Royal Canin","category":"food","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Indoor Adult Dry Cat Food 7 lb","notes":"Formulated for indoor adults","package_size":"7 lb bag","species":"cat"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Fancy Feast","category":"food","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Grilled Seafood & Chicken Variety Pack 3 oz x 24","notes":"Wet food variety pack","package_size":"24 cans","species":"cat"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Temptations","category":"treats","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Classic Chicken Treats 10 oz","notes":"Crunchy outside, soft inside; contains chicken","package_size":"10 oz tub","species":"cat"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Inaba","category":"treats","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Churu Lickable Chicken Treats 0.5 oz x 20","notes":"High-value lickable treat; contains chicken","package_size":"20 tubes","species":"cat"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Dr. Elsey's","category":"litter","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Ultra Clumping Cat Litter 40 lb","notes":"Unscented, multi-cat strength","package_size":"40 lb bag","species":"cat"},{"amazon_url":"REPLACE-WITH-AMAZON-ASSOCIATES-LINK","brand":"Orijen","category":"food","chewy_url":"REPLACE-WITH-CHEWS-PARTNERIZE-LINK","name":"Six Fish Dry Dog Food 4.5 lb","notes":"Fish-based, chicken-free option for allergy dogs","package_size":"4.5 lb bag","species":"dog"}]
+[
+  {
+    "amazon_url": "https://www.amazon.com/dp/B09K8YYVWV?th=1&linkCode=sl2&tag=pawpantry-20&linkId=2dfe5c563032791fc012a8d54029edde&language=en_US&gaOptInStatus=true&ref_=as_li_ss_tl",
+    "brand": "Blue Buffalo",
+    "category": "food",
+    "chewy_url": "",
+    "name": "Life Protection Formula Chicken & Brown Rice 5 lb",
+    "notes": "Everyday adult dry food",
+    "package_size": "5 lb bag",
+    "species": "dog",
+    "id": 1
+  },
+  {
+    "amazon_url": "",
+    "brand": "Purina",
+    "category": "food",
+    "chewy_url": "",
+    "name": "Pro Plan Sensitive Skin & Stomach Salmon",
+    "notes": "Salmon recipe. Check the current ingredient label with your veterinarian if your dog has allergies.",
+    "package_size": "Check available bag sizes on the product page",
+    "species": "dog",
+    "id": 2
+  },
+  {
+    "amazon_url": "",
+    "brand": "Greenies",
+    "category": "treats",
+    "chewy_url": "",
+    "name": "Original Teenie Dental Treats 48 oz",
+    "notes": "Dental chew treats. Check the package for dog size and age requirements.",
+    "package_size": "48 oz tub",
+    "species": "dog",
+    "id": 3
+  },
+  {
+    "amazon_url": "",
+    "brand": "Zuke's",
+    "category": "treats",
+    "chewy_url": "",
+    "name": "Mini Naturals Chicken 6 oz",
+    "notes": "Soft training treats, contains chicken",
+    "package_size": "6 oz bag",
+    "species": "dog",
+    "id": 4
+  },
+  {
+    "amazon_url": "",
+    "brand": "KONG",
+    "category": "toys",
+    "chewy_url": "",
+    "name": "KONG Classic",
+    "notes": "Durable chew / enrichment toy",
+    "package_size": "one toy",
+    "species": "dog",
+    "id": 5
+  },
+  {
+    "amazon_url": "",
+    "brand": "Earth Rated",
+    "category": "supplies",
+    "chewy_url": "",
+    "name": "Poop Bags 270 ct",
+    "notes": "Waste bags for everyday walks. Check the scent and count before buying.",
+    "package_size": "270 bags",
+    "species": "dog",
+    "id": 6
+  },
+  {
+    "amazon_url": "",
+    "brand": "Royal Canin",
+    "category": "food",
+    "chewy_url": "",
+    "name": "Indoor Adult Dry Cat Food 7 lb",
+    "notes": "Formulated for indoor adults",
+    "package_size": "7 lb bag",
+    "species": "cat",
+    "id": 7
+  },
+  {
+    "amazon_url": "",
+    "brand": "Fancy Feast",
+    "category": "food",
+    "chewy_url": "",
+    "name": "Grilled Seafood & Chicken Variety Pack 3 oz x 24",
+    "notes": "Wet food variety pack",
+    "package_size": "24 cans",
+    "species": "cat",
+    "id": 8
+  },
+  {
+    "amazon_url": "",
+    "brand": "Temptations",
+    "category": "treats",
+    "chewy_url": "",
+    "name": "Classic Chicken Treats 10 oz",
+    "notes": "Crunchy outside, soft inside; contains chicken",
+    "package_size": "10 oz tub",
+    "species": "cat",
+    "id": 9
+  },
+  {
+    "amazon_url": "",
+    "brand": "Inaba",
+    "category": "treats",
+    "chewy_url": "",
+    "name": "Churu Lickable Chicken Treats 0.5 oz x 20",
+    "notes": "High-value lickable treat; contains chicken",
+    "package_size": "20 tubes",
+    "species": "cat",
+    "id": 10
+  },
+  {
+    "amazon_url": "",
+    "brand": "Dr. Elsey's",
+    "category": "litter",
+    "chewy_url": "",
+    "name": "Ultra Clumping Cat Litter 40 lb",
+    "notes": "Unscented, multi-cat strength",
+    "package_size": "40 lb bag",
+    "species": "cat",
+    "id": 11
+  },
+  {
+    "amazon_url": "",
+    "brand": "Orijen",
+    "category": "food",
+    "chewy_url": "",
+    "name": "Six Fish Dry Dog Food 4.5 lb",
+    "notes": "Fish recipe. Check the current ingredient label with your veterinarian if your dog has allergies.",
+    "package_size": "4.5 lb bag",
+    "species": "dog",
+    "id": 12
+  },
+  {
+    "id": 13,
+    "name": "Original Pet Cot",
+    "brand": "K&H",
+    "species": "dog",
+    "category": "beds",
+    "package_size": "Check size options on the product page",
+    "notes": "Choose size to fit your dog. Raised resting surface.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 14,
+    "name": "Original Deluxe Travel Bag Pet Carrier",
+    "brand": "Sherpa",
+    "species": "cat",
+    "category": "carriers",
+    "package_size": "Check size options on the product page",
+    "notes": "Measure your cat and confirm carrier limits. Airline acceptance must be checked for your trip.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 15,
+    "name": "Front Range Flex Leash",
+    "brand": "Ruffwear",
+    "species": "dog",
+    "category": "leashes",
+    "package_size": "Check size options on the product page",
+    "notes": "Walking leash. Check the current length, clasp, and intended use.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 16,
+    "name": "Kickeroo Cactus",
+    "brand": "KONG",
+    "species": "cat",
+    "category": "toys",
+    "package_size": "Check size options on the product page",
+    "notes": "Catnip kicker toy. Supervise play and inspect for damage.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 17,
+    "name": "TetraMin Tropical Flakes",
+    "brand": "Tetra",
+    "species": "fish",
+    "category": "food",
+    "package_size": "Check size options on the product page",
+    "notes": "Flake food for appropriate tropical aquarium fish; confirm the diet for your specific species.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 18,
+    "name": "Western Timothy Hay",
+    "brand": "Oxbow",
+    "species": "rabbit",
+    "category": "food",
+    "package_size": "Check size options on the product page",
+    "notes": "Grass hay. Confirm your rabbit’s life-stage diet and read the package label.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 19,
+    "name": "Clean & Cozy Small Animal Bedding",
+    "brand": "Kaytee",
+    "species": "hamster",
+    "category": "bedding",
+    "package_size": "Check size options on the product page",
+    "notes": "Choose an appropriate unscented bedding variant and inspect the package before use.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 20,
+    "name": "Premium ReptiBark",
+    "brand": "Zoo Med",
+    "species": "reptile",
+    "category": "habitat",
+    "package_size": "Check size options on the product page",
+    "notes": "Bark substrate. Suitability depends on your reptile species and enclosure requirements.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 21,
+    "name": "Spray Millet",
+    "brand": "Kaytee",
+    "species": "bird",
+    "category": "treats",
+    "package_size": "Check size options on the product page",
+    "notes": "Bird treat, not a complete diet. Check suitability and label instructions for your bird.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 22,
+    "name": "Large Firm Slicker Brush",
+    "brand": "FURminator",
+    "species": "dog",
+    "category": "grooming",
+    "package_size": "Check size options on the product page",
+    "notes": "Check coat compatibility and grooming instructions before use.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 23,
+    "name": "Advanced Stain and Odor Eliminator for Dogs",
+    "brand": "Nature’s Miracle",
+    "species": "dog",
+    "category": "cleaning",
+    "package_size": "Check size options on the product page",
+    "notes": "Follow label directions, test surfaces first, and keep pets away until the treated area is dry.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 24,
+    "name": "Drinkwell Platinum Pet Fountain",
+    "brand": "PetSafe",
+    "species": "cat",
+    "category": "feeding",
+    "package_size": "Check size options on the product page",
+    "notes": "Drinking fountain. Check capacity, cleaning instructions, and replacement-filter compatibility.",
+    "amazon_url": "",
+    "chewy_url": ""
+  },
+  {
+    "id": 25,
+    "name": "Dog Flea Comb with Plastic Handle",
+    "brand": "Safari by Coastal",
+    "species": "dog",
+    "category": "flea-tick",
+    "package_size": "Check size options on the product page",
+    "notes": "Manual grooming comb; it is not a flea or tick preventive medicine. Ask your vet about treatment or prevention.",
+    "amazon_url": "",
+    "chewy_url": ""
+  }
+]

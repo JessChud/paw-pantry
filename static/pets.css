@@ -1,13 +1,16 @@
 /* Decorative, locally hosted pet art. Text labels carry the meaning. */
-.pet-intro { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 12px; }
+.pet-header { position: relative; }
+.pet-intro { margin-top: 16px; text-align: center; }
 .pet-intro h1 { margin-top: 0; }
-.pet-copy { text-align: left; }
-header img.pet-friends { width: 210px; height: auto; flex: 0 0 210px; border-radius: 0; box-shadow: none; }
+.pet-copy { text-align: center; }
+header img.pet-friends { position: absolute; top: 10px; width: 140px; height: auto; border-radius: 0; box-shadow: none; pointer-events: none; }
+.pet-friends-left { left: 24px; }
+.pet-friends-right { right: 24px; transform: scaleX(-1); }
 .tag { display: flex; align-items: center; gap: 9px; }
 .pet-icon { width: 38px; height: 38px; padding: 3px; box-sizing: border-box; background: #fffaed; border-radius: 12px; flex-shrink: 0; }
 .paw-footer::before { content: ""; display: block; width: 114px; height: 38px; margin: 0 auto 18px; background: url('/static/pets/paw.svg') 0 0 / 38px 38px repeat-x; opacity: .32; transform: rotate(-9deg); pointer-events: none; }
 @media (max-width: 600px) {
-  .pet-intro { flex-direction: column; gap: 6px; }
-  .pet-copy { text-align: center; }
-  header img.pet-friends { width: 185px; flex-basis: auto; }
+  header img.pet-friends { top: 24px; width: clamp(64px, 22vw, 100px); }
+  .pet-friends-left { left: 0; }
+  .pet-friends-right { right: 0; }
 }

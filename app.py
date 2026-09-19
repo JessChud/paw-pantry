@@ -221,6 +221,7 @@ def seed():
                             "EXISTS(SELECT 1 FROM products))"))
 
 
+@app.head("/health", include_in_schema=False)
 @app.get("/health")
 def health(db: Session = Depends(get_db)):
     try:
@@ -231,6 +232,7 @@ def health(db: Session = Depends(get_db)):
 
 
 # ---- homepage + static legal pages (served so /, /privacy and /terms work on the free subdomain) ----
+@app.head("/", response_class=HTMLResponse, include_in_schema=False)
 @app.get("/", response_class=HTMLResponse)
 def home():
     return (BASE_DIR / "static" / "index.html").read_text()

@@ -40,6 +40,27 @@ def test_auth_and_schema(api):
     assert schema['components']['securitySchemes']['APIKeyHeader']['name'] == 'X-API-Key'
 
 
+def test_availability_checks_support_head_and_detect_database_failure(api):
+    client, module = api
+    client.headers.pop('X-API-Key')
+    for path in ('/', '/health'):
+        response = client.head(path)
+        assert response.status_code == 200
+        assert response.content == b''
+        assert response.headers['content-type'] == client.get(path).headers['content-type']
+
+    class UnavailableDatabase:
+        def execute(self, statement):
+            raise module.SQLAlchemyError('private connection failure')
+
+    module.app.dependency_overrides[module.get_db] = lambda: UnavailableDatabase()
+    try:
+        assert client.head('/health').status_code == 503
+        assert client.get('/health').json() == {'detail': 'database unavailable'}
+    finally:
+        module.app.dependency_overrides.clear()
+
+
 def test_input_validation_and_null_update(api):
     client, _ = api
     pet_id = pet(client)

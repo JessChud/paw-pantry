@@ -11,6 +11,7 @@ from typing import List, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
@@ -96,6 +97,7 @@ class SupplyCreate(BaseModel):
 
 # ---------------- app ----------------
 app = FastAPI(title="Paw Pantry API", version="0.1.0")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 
 def get_db():

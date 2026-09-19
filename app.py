@@ -147,7 +147,12 @@ def health():
     return {"ok": True}
 
 
-# ---- static legal pages (served so /privacy and /terms work on the free subdomain) ----
+# ---- homepage + static legal pages (served so /, /privacy and /terms work on the free subdomain) ----
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return (BASE_DIR / "static" / "index.html").read_text()
+
+
 @app.get("/privacy", response_class=HTMLResponse)
 def privacy():
     return (BASE_DIR / "static" / "privacy.html").read_text()

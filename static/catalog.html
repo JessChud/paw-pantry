@@ -4,7 +4,8 @@
 <a href="/">← Paw Pantry</a><h1>Explore pet supplies</h1>
 <p class="intro">A starter catalog for everyday pet needs. These are examples to explore, not a personalized endorsement. Check your pet’s species, age, size, and needs against the current product label.</p>
 <div class="disclosure"><strong>Affiliate disclosure:</strong> As an Amazon Associate I earn from qualifying purchases. Amazon affiliate links are labeled below. Manufacturer information links are not affiliate links. Prices, availability, and checkout are handled by the retailer.</div>
+<p>Before choosing an item, <a href="/guide">read our practical shopping guides</a> or <a href="/calculator">estimate your next refill</a>.</p>
 <form action="/catalog" method="get"><div><label for="q">Search products</label><input id="q" name="q" maxlength="200" value="{{QUERY}}" placeholder="Food, toys, brush…"></div><div><label for="species">Pet</label><select id="species" name="species">{{SPECIES}}</select></div><div><label for="category">Category</label><select id="category" name="category">{{CATEGORIES}}</select></div><button type="submit">Find supplies</button><a href="/catalog">Clear filters</a></form>
 <p>{{COUNT}} products</p><div class="grid">{{PRODUCTS}}</div>
-<footer><a href="/guide">Pet-supply guide</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="mailto:hellopawpantry@gmail.com">Contact</a></footer>
+<footer><a href="/guide">Pet-supply guide</a> · <a href="/about">About &amp; editorial policy</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="mailto:hellopawpantry@gmail.com">Contact</a></footer>
 </main></body></html>

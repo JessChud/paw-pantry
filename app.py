@@ -233,6 +233,24 @@ def guide():
     return (BASE_DIR / "static" / "guide.html").read_text()
 
 
+@app.get("/about", response_class=HTMLResponse)
+def about():
+    return (BASE_DIR / "static" / "about.html").read_text()
+
+
+@app.get("/calculator", response_class=HTMLResponse)
+def calculator():
+    return (BASE_DIR / "static" / "calculator.html").read_text()
+
+
+@app.get("/guides/{slug}", response_class=HTMLResponse)
+def shopping_guide(slug: str):
+    guides = json.loads((BASE_DIR / "data" / "guides.json").read_text())
+    if slug not in {guide["slug"] for guide in guides}:
+        raise HTTPException(404, "guide not found")
+    return (BASE_DIR / "static" / "guides" / f"{slug}.html").read_text()
+
+
 @app.get("/catalog", response_class=HTMLResponse)
 def public_catalog(q: str = Query(default="", max_length=200),
                    species: str = Query(default="", max_length=60),

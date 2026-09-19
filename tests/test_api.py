@@ -201,3 +201,88 @@ def test_retired_variants_keep_supply_history(api):
     assert tracked['replacement_product_id'] == 26
     assert tracked['website_url'] is None
     assert tracked['amazon_link_available'] is False
+    assert tracked['chewy_link_available'] is False
+
+
+def reviewed_chewy_fixture(module, monkeypatch):
+    # Synthetic tracker for local tests only; never added to production data.
+    url = 'https://tracking.example/paw-pantry/product-1?variant=5lb&source=website'
+    sources = module.catalog_metadata()
+    sources['1'].update({
+        'chewy_affiliate_url': url,
+        'chewy_product_url': 'https://www.chewy.com/test-product/dp/123',
+        'chewy_checked': '2026-09-19',
+        'chewy_verified_variant': 'Chicken & Brown Rice; 5 lb bag',
+        'chewy_link_source': 'Synthetic dashboard record for tests only',
+    })
+    program = {'status': 'approved', 'verified_tracking_hosts': ['tracking.example']}
+    monkeypatch.setattr(module, 'catalog_metadata', lambda: sources)
+    monkeypatch.setattr(module, 'chewy_program', lambda: program)
+    with module.SessionLocal.begin() as db:
+        db.get(module.Product, 1).chewy_url = url
+    return url, sources['1'], program
+
+
+def test_chewy_pending_cannot_publish_even_with_a_link(api, monkeypatch):
+    client, module = api
+    url, _, program = reviewed_chewy_fixture(module, monkeypatch)
+    for status in ('in_review', 'paused', 'rejected', None):
+        program['status'] = status
+        assert client.get('/products/1/link?retailer=chewy').status_code == 409
+        assert client.get('/products').json()[0]['chewy_link_available'] is False
+        page = client.get('/catalog').text
+        assert 'tracking.example' not in page
+        assert 'View on Amazon (affiliate link)' in page
+        assert ('Chewy links are coming soon' in page) == (status == 'in_review')
+
+
+def test_verified_chewy_link_is_consistent_in_api_and_catalog(api, monkeypatch):
+    client, module = api
+    url, _, _ = reviewed_chewy_fixture(module, monkeypatch)
+    response = client.get('/products/1/link?retailer=chewy')
+    assert response.status_code == 200
+    assert response.json()['url'] == url
+    assert response.json()['destination'] == 'Chewy'
+    assert 'commission' in response.json()['disclosure']
+    assert 'Amazon Associate' not in response.json()['disclosure']
+    assert response.json()['product']['chewy_link_available'] is True
+    page = client.get('/catalog').text
+    assert 'View on Chewy (affiliate link)' in page
+    assert 'variant=5lb&amp;source=website' in page
+    assert 'Chewy links are coming soon' not in page
+    client.headers.pop('X-API-Key')
+    assert client.get('/catalog').status_code == 200
+    assert client.get('/products/1/link?retailer=chewy').status_code == 401
+
+
+@pytest.mark.parametrize('bad_url', [
+    'https://www.chewy.com/test-product/dp/123',
+    'https://tracking.example/another-publisher/product-1',
+    'https://tracking.example.evil.test/product-1',
+    'https://user:password@tracking.example/product-1',
+    'http://tracking.example/product-1',
+    'https://tracking.example:8443/product-1',
+    'https://[broken',
+])
+def test_unverified_chewy_links_never_publish(api, monkeypatch, bad_url):
+    client, module = api
+    reviewed_chewy_fixture(module, monkeypatch)
+    with module.SessionLocal.begin() as db:
+        db.get(module.Product, 1).chewy_url = bad_url
+    assert client.get('/products/1/link?retailer=chewy').status_code == 409
+    assert client.get('/products').json()[0]['chewy_link_available'] is False
+    assert 'View on Chewy (affiliate link)' not in client.get('/catalog').text
+
+
+def test_chewy_requires_variant_record_and_blocks_retired_products(api, monkeypatch):
+    client, module = api
+    url, source, program = reviewed_chewy_fixture(module, monkeypatch)
+    for field in ('chewy_affiliate_url', 'chewy_product_url', 'chewy_checked',
+                  'chewy_verified_variant', 'chewy_link_source'):
+        saved = source.pop(field)
+        assert client.get('/products/1/link?retailer=chewy').status_code == 409
+        source[field] = saved
+    source['catalog_status'] = 'retired'
+    assert client.get('/products/1/link?retailer=chewy').status_code == 409
+    assert client.get('/products/1/link?retailer=amazon').status_code == 409
+    assert 'tracking.example' not in client.get('/catalog').text

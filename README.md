@@ -33,7 +33,7 @@ The public site also offers ten original AI-assisted planning guides and a brows
 
 ## Affiliate link maintenance
 
-Run `python scripts/check_affiliate_links.py` before publishing. It checks every configured link against its recorded ASIN and the required `pawpantry-20` tag without opening affiliate URLs or generating clicks. Verify the current product page and variant separately when adding an ASIN. Amazon’s Link Checker confirmed a sample of the documented format tags to this account. SiteStripe copying is not required. The API also rejects Amazon links with an incorrect tag and supplies a public catalog URL for each item. Use the public website as the shopping destination while Muse placement permission is unresolved.
+Run `python scripts/check_affiliate_links.py` before publishing. It checks Amazon links against their recorded ASIN and the required `pawpantry-20` tag, and Chewy links against approval and dated verification records without opening affiliate URLs or generating clicks. Verify the current product page and variant separately when adding an ASIN. Amazon’s Link Checker confirmed a sample of the documented format tags to this account. SiteStripe copying is not required. The API also rejects Amazon links with an incorrect tag and supplies a public catalog URL for each item. Use the public website as the shopping destination while Muse placement permission is unresolved.
 
 ## Tests and deployment
 
@@ -48,3 +48,17 @@ For credential rotation, the owner must replace `PAW_PANTRY_API_KEY` in Render a
 Use `/ping` for frequent external availability checks and Render's Health Check Path. Leave `/health` for on-demand database diagnostics: querying it every few seconds prevents Neon's idle compute from suspending. Startup still connects to the database and seeds the catalog before accepting traffic.
 
 A proposed external schedule is one GET to `https://paw-pantry.onrender.com/ping` every five minutes, with no credentials, cookies, browser execution, or affiliate-link visits. The scheduler must be enabled and its execution history verified separately; deploying this endpoint alone does not enable a schedule. Free hosting can still restart or sleep after missed requests, and Render's 750 monthly free instance hours are shared across the workspace. This is a best-effort workaround, not an uptime guarantee or exemption from provider usage rules.
+
+## Activating Chewy after approval
+
+Chewy is currently **in review** (owner confirmed September 19, 2026). No Chewy commissions or tracking links are active. The catalog and private API support both retailers, but Chewy links stay hidden and its link endpoint returns 409 until all checks pass. Product responses include `chewy_link_available`; clients should check it before requesting a Chewy link and always show the returned disclosure. The catalog displays a pending notice while the application is in review.
+
+After approval:
+
+1. Check the actual Impact contract for eligible orders, rates, and permitted placements. Do not assume repeat purchases or Autoship renewals earn commissions. Website approval alone does not authorize placement inside Muse conversations.
+2. Generate product links inside Paw Pantry's approved Impact account. Verify each destination against the existing catalog item's exact size, flavor, count, and variant. Do not guess tracking IDs, reuse another publisher's link, or substitute a different variant under an existing product ID.
+3. Put the full dashboard-issued URL in the product's `chewy_url` in `data/seed_products.json`. In that product's `data/catalog_sources.json` record, add `chewy_affiliate_url` (the same exact URL), `chewy_product_url` (the verified Chewy product page), `chewy_checked` (date), `chewy_verified_variant`, and `chewy_link_source` (how the link was obtained and verified against this account).
+4. Change `data/chewy_program.json` status to `approved`, update `status_checked`, and populate `verified_tracking_hosts` with only the exact hostname(s) observed in those dashboard-issued links. This list is deliberately empty today; no tracking domain or publisher ID has been invented. This file and the provenance records are reviewed configuration, not an automatic check of Impact approval.
+5. Run the affiliate checker and tests, then deploy and check the live buttons. Update the pending statement on the About page after approval. The catalog notice disappears automatically when the status changes.
+
+Both retailers use the same stable product record and disclosure behavior. Ordinary Chewy product URLs are not accepted as affiliate links without the approval and exact-link verification records. To disable Chewy links later, set the program status to `paused`; API and catalog both stop serving them even if URLs remain in the database. These changes require no database migration and do not alter pet profiles or supplies.

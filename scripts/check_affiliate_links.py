@@ -1,20 +1,29 @@
 """Validate catalog link configuration without network requests or affiliate clicks."""
 import json
 import re
+import sys
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from affiliate_links import valid_chewy_link
 
 
 def check():
     products = json.loads((ROOT / 'data/seed_products.json').read_text())
     metadata = json.loads((ROOT / 'data/catalog_sources.json').read_text())
+    program = json.loads((ROOT / 'data/chewy_program.json').read_text())
     errors, linked = [], 0
+    chewy_linked = 0
     ids = [p['id'] for p in products]
     if len(set(ids)) != len(ids):
         errors.append('Duplicate product IDs')
     for product in products:
+        if product.get('chewy_url'):
+            chewy_linked += 1
+            if not valid_chewy_link(product['chewy_url'], metadata.get(str(product['id']), {}), program):
+                errors.append(f"Product {product['id']}: Chewy approval or exact-link/variant verification missing or invalid")
         url = product.get('amazon_url')
         if not url:
             continue
@@ -35,6 +44,7 @@ def check():
     if errors:
         raise SystemExit('\n'.join(errors))
     print(f'{linked} Amazon links passed ASIN, variant-record, HTTPS, and tracking-tag checks.')
+    print(f'{chewy_linked} Chewy links passed approval, exact-link, HTTPS, and variant-record checks. Program status: {program.get("status", "unconfigured")}.')
 
 
 if __name__ == '__main__':

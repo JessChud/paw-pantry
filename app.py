@@ -23,6 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
+from affiliate_links import valid_chewy_link
 
 BASE_DIR = Path(__file__).parent
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR}/pawpantry.db")
@@ -185,6 +186,11 @@ def valid_amazon_link(url):
             and parse_qs(parsed.query).get("tag") == ["pawpantry-20"])
 
 
+def chewy_program():
+    path = BASE_DIR / "data" / "chewy_program.json"
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
 def product_to_dict(p: Product) -> dict:
     metadata = catalog_metadata().get(str(p.id), {})
     retired = metadata.get("catalog_status") == "retired"
@@ -195,7 +201,8 @@ def product_to_dict(p: Product) -> dict:
         "website_url": None if retired else f"https://paw-pantry.onrender.com/catalog#product-{p.id}",
         "catalog_status": "retired" if retired else "active",
         "replacement_product_id": metadata.get("replacement_product_id"),
-        "amazon_link_available": valid_amazon_link(p.amazon_url),
+        "amazon_link_available": not retired and valid_amazon_link(p.amazon_url),
+        "chewy_link_available": valid_chewy_link(p.chewy_url, metadata, chewy_program()),
     }
 
 
@@ -284,6 +291,7 @@ def public_catalog(q: str = Query(default="", max_length=200),
                    category: str = Query(default="", max_length=60),
                    db: Session = Depends(get_db)):
     sources = catalog_metadata()
+    program = chewy_program()
     all_products = [p for p in db.query(Product).order_by(Product.id).all()
                     if sources.get(str(p.id), {}).get("catalog_status") != "retired"]
     products = [p for p in all_products
@@ -293,12 +301,14 @@ def public_catalog(q: str = Query(default="", max_length=200),
     cards = []
     for p in products:
         links = []
+        source = sources.get(str(p.id), {})
         if valid_amazon_link(p.amazon_url):
             links.append(f'<a class="link" rel="sponsored nofollow noopener" href="{escape(p.amazon_url, quote=True)}">View on Amazon (affiliate link)</a>')
-        source = sources.get(str(p.id), {}).get("url", "")
-        if source and not p.amazon_url:
-            links.append(f'<a class="link" rel="noopener" href="{escape(source, quote=True)}">Manufacturer product information</a>')
-        if not p.amazon_url and not p.chewy_url:
+        if valid_chewy_link(p.chewy_url, source, program):
+            links.append(f'<a class="link" rel="sponsored nofollow noopener" href="{escape(p.chewy_url, quote=True)}">View on Chewy (affiliate link)</a>')
+        if not links:
+            if source.get("url"):
+                links.append(f'<a class="link" rel="noopener" href="{escape(source["url"], quote=True)}">Product information (not an affiliate link)</a>')
             links.append('<p class="pending">Affiliate purchase link not available yet.</p>')
         cards.append(f'<article id="product-{p.id}"><p class="tag">{escape(p.species)} · {escape(p.category)}</p>'
                      f'<h2>{escape(p.brand)} {escape(p.name)}</h2>'
@@ -313,6 +323,8 @@ def public_catalog(q: str = Query(default="", max_length=200),
         "{{SPECIES}}": options({p.species for p in all_products}, species, "All pets"),
         "{{CATEGORIES}}": options({p.category for p in all_products}, category, "All categories"),
         "{{COUNT}}": str(len(products)),
+        "{{CHEWYSTATUS}}": ('<p class="pending">Chewy links are coming soon, subject to affiliate approval.</p>'
+                            if program.get("status") == "in_review" else ""),
         "{{PRODUCTS}}": ''.join(cards) or '<p>No matching products yet. Try a broader search.</p>',
     }
     return re.sub(r"\{\{[A-Z]+\}\}", lambda match: replacements.get(match.group(), match.group()), page)
@@ -431,12 +443,12 @@ def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon
     p = db.get(Product, product_id)
     if not p:
         raise HTTPException(404, "product not found")
+    source = catalog_metadata().get(str(p.id), {})
+    if source.get("catalog_status") == "retired":
+        raise HTTPException(409, "affiliate link not available for a retired product")
     url = p.chewy_url if retailer == "chewy" else p.amazon_url
-    expected_hosts = {"amazon": {"www.amazon.com", "amazon.com", "amzn.to"},
-                      "chewy": {"www.chewy.com", "chewy.com", "chewy.prf.hn"}}
-    parsed = urlparse(url or "")
-    if not url or "REPLACE" in url or parsed.scheme != "https" or parsed.hostname not in expected_hosts[retailer]:
-        raise HTTPException(409, "affiliate link not configured for this product yet")
+    if retailer == "chewy" and not valid_chewy_link(url, source, chewy_program()):
+        raise HTTPException(409, "verified Chewy affiliate link not available for this product yet")
     if retailer == "amazon" and not valid_amazon_link(url):
         raise HTTPException(409, "affiliate tracking tag is not configured correctly")
     return {"product": product_to_dict(p), "retailer": retailer,

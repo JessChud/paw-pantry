@@ -11,7 +11,7 @@ from datetime import date, timedelta
 from hmac import compare_digest
 from html import escape
 from math import ceil
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -173,11 +173,29 @@ def pet_to_dict(pet: Pet) -> dict:
     }
 
 
+def catalog_metadata():
+    path = BASE_DIR / "data" / "catalog_sources.json"
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
+def valid_amazon_link(url):
+    parsed = urlparse(url or "")
+    return (parsed.scheme == "https" and parsed.hostname in {"www.amazon.com", "amazon.com"}
+            and not parsed.username and not parsed.password
+            and parse_qs(parsed.query).get("tag") == ["pawpantry-20"])
+
+
 def product_to_dict(p: Product) -> dict:
+    metadata = catalog_metadata().get(str(p.id), {})
+    retired = metadata.get("catalog_status") == "retired"
     return {
         "id": p.id, "name": p.name, "brand": p.brand,
         "species": p.species, "category": p.category,
         "package_size": p.package_size, "notes": p.notes,
+        "website_url": None if retired else f"https://paw-pantry.onrender.com/catalog#product-{p.id}",
+        "catalog_status": "retired" if retired else "active",
+        "replacement_product_id": metadata.get("replacement_product_id"),
+        "amazon_link_available": valid_amazon_link(p.amazon_url),
     }
 
 
@@ -256,8 +274,9 @@ def public_catalog(q: str = Query(default="", max_length=200),
                    species: str = Query(default="", max_length=60),
                    category: str = Query(default="", max_length=60),
                    db: Session = Depends(get_db)):
-    all_products = db.query(Product).order_by(Product.id).all()
-    sources = json.loads((BASE_DIR / "data" / "catalog_sources.json").read_text())
+    sources = catalog_metadata()
+    all_products = [p for p in db.query(Product).order_by(Product.id).all()
+                    if sources.get(str(p.id), {}).get("catalog_status") != "retired"]
     products = [p for p in all_products
                 if (not species or p.species in (species.lower(), "any"))
                 and (not category or p.category == category.lower())
@@ -265,15 +284,14 @@ def public_catalog(q: str = Query(default="", max_length=200),
     cards = []
     for p in products:
         links = []
-        amazon = urlparse(p.amazon_url or "")
-        if amazon.scheme == "https" and amazon.hostname in {"www.amazon.com", "amazon.com", "amzn.to"}:
+        if valid_amazon_link(p.amazon_url):
             links.append(f'<a class="link" rel="sponsored nofollow noopener" href="{escape(p.amazon_url, quote=True)}">View on Amazon (affiliate link)</a>')
         source = sources.get(str(p.id), {}).get("url", "")
         if source and not p.amazon_url:
             links.append(f'<a class="link" rel="noopener" href="{escape(source, quote=True)}">Manufacturer product information</a>')
         if not p.amazon_url and not p.chewy_url:
             links.append('<p class="pending">Affiliate purchase link not available yet.</p>')
-        cards.append(f'<article><p class="tag">{escape(p.species)} · {escape(p.category)}</p>'
+        cards.append(f'<article id="product-{p.id}"><p class="tag">{escape(p.species)} · {escape(p.category)}</p>'
                      f'<h2>{escape(p.brand)} {escape(p.name)}</h2>'
                      f'<p>{escape(p.package_size)}</p><p>{escape(p.notes)}</p>{"".join(links)}</article>')
     def options(values, selected, label):
@@ -379,6 +397,10 @@ def runout(pet_id: int, db: Session = Depends(get_db)):
 def list_products(species: Optional[str] = None, category: Optional[str] = None,
                   q: Optional[str] = Query(default=None, max_length=200), db: Session = Depends(get_db)):
     query = db.query(Product)
+    retired_ids = [int(key) for key, value in catalog_metadata().items()
+                   if value.get("catalog_status") == "retired"]
+    if retired_ids:
+        query = query.filter(Product.id.notin_(retired_ids))
     if species:
         query = query.filter(Product.species.in_([species.lower(), "any"]))
     if category:
@@ -406,6 +428,8 @@ def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon
     parsed = urlparse(url or "")
     if not url or "REPLACE" in url or parsed.scheme != "https" or parsed.hostname not in expected_hosts[retailer]:
         raise HTTPException(409, "affiliate link not configured for this product yet")
+    if retailer == "amazon" and not valid_amazon_link(url):
+        raise HTTPException(409, "affiliate tracking tag is not configured correctly")
     return {"product": product_to_dict(p), "retailer": retailer,
             "url": url, "disclosure": DISCLOSURE + (" As an Amazon Associate I earn from qualifying purchases." if retailer == "amazon" else ""),
             "destination": "Amazon" if retailer == "amazon" else "Chewy"}

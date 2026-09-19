@@ -142,3 +142,25 @@ def test_public_catalog_filters_and_escapes(api):
     assert '&lt;img src=x' in response.text
     assert 'As an Amazon Associate I earn from qualifying purchases.' in response.text
     assert 'tag=pawpantry-20' in response.text
+
+
+def test_wrong_tracking_tag_is_not_published(api):
+    client, module = api
+    with module.SessionLocal.begin() as db:
+        db.get(module.Product, 1).amazon_url = 'https://www.amazon.com/dp/B09K8YYVWV?tag=wrong-owner-20'
+    assert client.get('/products/1/link').status_code == 409
+    assert 'wrong-owner-20' not in client.get('/catalog').text
+
+
+def test_retired_variants_keep_supply_history(api):
+    client, _ = api
+    pet_id = pet(client)
+    assert client.post(f'/pets/{pet_id}/supplies', json=supply_payload(product_id=3)).status_code == 200
+    assert 3 not in [product['id'] for product in client.get('/products').json()]
+    assert 'product-3"' not in client.get('/catalog').text
+    tracked = client.get(f'/pets/{pet_id}/runout').json()[0]['product']
+    assert tracked['id'] == 3
+    assert tracked['catalog_status'] == 'retired'
+    assert tracked['replacement_product_id'] == 26
+    assert tracked['website_url'] is None
+    assert tracked['amazon_link_available'] is False

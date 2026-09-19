@@ -29,7 +29,11 @@ The public site also offers ten original AI-assisted planning guides and a brows
 
 `data/seed_products.json` contains stable product IDs. Startup updates those managed IDs and inserts new ones in a transaction; it preserves pets, supplies, and other product rows. Never recycle an ID for a different product. Schema changes need a separate migration plan; startup table creation does not migrate existing columns.
 
-`data/catalog_sources.json` records checked manufacturer pages for newer entries and the verified Amazon link source. One Amazon purchase link is currently configured. Other purchase links remain unavailable, and Chewy approval is pending. Missing links return 409 rather than a placeholder. Do not invent affiliate links or advertise approval that has not been received. Confirm Amazon permits the intended Muse placement before enabling affiliate links inside conversations; a website listing does not establish that permission.
+`data/catalog_sources.json` records checked manufacturer pages, Amazon ASINs, checked variants, and link provenance. Five older package/variant records are retired from browsing and search but retained in the database for existing supplies; their alternatives have new IDs. 23 Amazon purchase links are currently configured. Two current entries still lack verified Amazon matches, and Chewy approval is pending. Missing links return 409 rather than a placeholder. Use only verified product ASINs with Amazon’s documented simple text link format; do not guess product IDs or advertise approval that has not been received. Confirm Amazon permits the intended Muse placement before enabling affiliate links inside conversations; a website listing does not establish that permission.
+
+## Affiliate link maintenance
+
+Run `python scripts/check_affiliate_links.py` before publishing. It checks every configured link against its recorded ASIN and the required `pawpantry-20` tag without opening affiliate URLs or generating clicks. Verify the current product page and variant separately when adding an ASIN. Amazon’s Link Checker confirmed a sample of the documented format tags to this account. SiteStripe copying is not required. The API also rejects Amazon links with an incorrect tag and supplies a public catalog URL for each item. Use the public website as the shopping destination while Muse placement permission is unresolved.
 
 ## Tests and deployment
 

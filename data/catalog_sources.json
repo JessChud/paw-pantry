@@ -2,22 +2,43 @@
   "1": {
     "url": "https://www.amazon.com/dp/B09K8YYVWV",
     "checked": "2026-09-19",
-    "link_source": "Owner-provided SiteStripe link https://amzn.to/4h2TztX; verified redirect contains pawpantry-20"
+    "link_source": "Owner-provided SiteStripe link https://amzn.to/4h2TztX; verified redirect contains pawpantry-20",
+    "amazon_asin": "B09K8YYVWV",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "Chicken & Brown Rice; 5 lb bag"
   },
   "13": {
     "url": "https://khpet.com/collections/pet-cots/products/original-pet-cot",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B07PLF37V9",
+    "amazon_product_url": "https://www.amazon.com/dp/B07PLF37V9",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "Large 42 × 30 inches; chocolate/black mesh",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "14": {
     "url": "https://sherpapet.com/products/sherpa-original-deluxe-travel-bag-pet-carrier?Color=Black&Size=Medium",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B000FLETX8",
+    "amazon_product_url": "https://www.amazon.com/dp/B000FLETX8",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "Medium; black; 17 × 11 × 10.5 inches",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "15": {
     "url": "https://ruffwear.com/products/front-range-flex-leash",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B0FPZPP481",
+    "amazon_product_url": "https://www.amazon.com/dp/B0FPZPP481",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "5 ft; Polar Blue",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "16": {
     "url": "https://www.kongcompany.com/kickeroo-cactus/",
@@ -27,27 +48,57 @@
   "17": {
     "url": "https://www.tetra-fish.com/products/nutrition/tetramin-tropical-flakes",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B00025K0TY",
+    "amazon_product_url": "https://www.amazon.com/dp/B00025K0TY",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "7.06 oz",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "18": {
     "url": "https://oxbowanimalhealth.com/product/western-timothy/",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B006AYMMRY",
+    "amazon_product_url": "https://www.amazon.com/dp/B006AYMMRY",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "90 oz",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "19": {
     "url": "https://www.kaytee.com/learn-care/small-animals/choosing-the-right-bedding-litter",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B006HX5PNQ",
+    "amazon_product_url": "https://www.amazon.com/dp/B006HX5PNQ",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "24.6 liters; white",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "20": {
     "url": "https://zoomed.com/premium-reptibark/",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B0002DIZIY",
+    "amazon_product_url": "https://www.amazon.com/dp/B0002DIZIY",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "4 quarts",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "21": {
     "url": "https://www.kaytee.com/all-products/pet-bird/spray-millet",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B000VOE3QW",
+    "amazon_product_url": "https://www.amazon.com/dp/B000VOE3QW",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "7 oz",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "22": {
     "url": "https://www.furminator.com/products/brush/brushes-and-rakes/large-firm-slicker-brush",
@@ -57,16 +108,147 @@
   "23": {
     "url": "https://www.naturesmiracle.com/products/stain-and-odor/advanced-stain-and-odor-eliminator-for-dogs",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B0723HRWJW",
+    "amazon_product_url": "https://www.amazon.com/dp/B0723HRWJW",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "32 oz",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "24": {
     "url": "https://www.petsafe.com/p/drinkwell-platinum-fountain/PWW00-13703/",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "amazon_asin": "B000L3XYZ4",
+    "amazon_product_url": "https://www.amazon.com/dp/B000L3XYZ4",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "168 oz / 5 liters; grey",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   },
   "25": {
     "url": "https://www.coastalpet.com/products/detail?id=SDG17",
     "checked": "2026-09-19",
-    "link_source": "Official manufacturer information; not an affiliate link"
+    "link_source": "Official manufacturer information; not an affiliate link",
+    "catalog_status": "retired",
+    "replacement_product_id": 30,
+    "reason": "Original exact package or variant not verified; replacement is a separate product choice."
+  },
+  "3": {
+    "catalog_status": "retired",
+    "replacement_product_id": 26,
+    "reason": "Original exact package or variant not verified; replacement is a separate product choice."
+  },
+  "8": {
+    "catalog_status": "retired",
+    "replacement_product_id": 27,
+    "reason": "Original exact package or variant not verified; replacement is a separate product choice."
+  },
+  "9": {
+    "catalog_status": "retired",
+    "replacement_product_id": 28,
+    "reason": "Original exact package or variant not verified; replacement is a separate product choice."
+  },
+  "10": {
+    "catalog_status": "retired",
+    "replacement_product_id": 29,
+    "reason": "Original exact package or variant not verified; replacement is a separate product choice."
+  },
+  "2": {
+    "amazon_asin": "B0BTMZPNC7",
+    "amazon_product_url": "https://www.amazon.com/dp/B0BTMZPNC7",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "4 lb bag",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "4": {
+    "amazon_asin": "B0007A0AQM",
+    "amazon_product_url": "https://www.amazon.com/dp/B0007A0AQM",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "6 oz pouch",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "5": {
+    "amazon_asin": "B000AYN7LU",
+    "amazon_product_url": "https://www.amazon.com/dp/B000AYN7LU",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "Medium; one toy",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "6": {
+    "amazon_asin": "B00BSYR7K8",
+    "amazon_product_url": "https://www.amazon.com/dp/B00BSYR7K8",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "270 bags; lavender",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "7": {
+    "amazon_asin": "B000YKD6UW",
+    "amazon_product_url": "https://www.amazon.com/dp/B000YKD6UW",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "7 lb bag",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "11": {
+    "amazon_asin": "B0009X29WK",
+    "amazon_product_url": "https://www.amazon.com/dp/B0009X29WK",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "40 lb bag",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "12": {
+    "amazon_asin": "B01MXMJCP2",
+    "amazon_product_url": "https://www.amazon.com/dp/B01MXMJCP2",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "4.5 lb bag",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "26": {
+    "amazon_asin": "B001G96UK8",
+    "amazon_product_url": "https://www.amazon.com/dp/B001G96UK8",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "96 count (one pack)",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "27": {
+    "amazon_asin": "B001STX13U",
+    "amazon_product_url": "https://www.amazon.com/dp/B001STX13U",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "24 cans, 3 oz each",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "28": {
+    "amazon_asin": "B00IOTB7PG",
+    "amazon_product_url": "https://www.amazon.com/dp/B00IOTB7PG",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "16 oz tub",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "29": {
+    "amazon_asin": "B07D32MLPX",
+    "amazon_product_url": "https://www.amazon.com/dp/B07D32MLPX",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "20 tubes, 0.5 oz each",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
+  },
+  "30": {
+    "amazon_asin": "B0002RJMAK",
+    "amazon_product_url": "https://www.amazon.com/dp/B0002RJMAK",
+    "amazon_checked": "2026-09-19",
+    "verified_variant": "One comb",
+    "affiliate_link_method": "Amazon documented simple text link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GP38PJ6EUR6PFBEC"
   }
 }

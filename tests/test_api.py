@@ -61,6 +61,22 @@ def test_availability_checks_support_head_and_detect_database_failure(api):
         module.app.dependency_overrides.clear()
 
 
+def test_liveness_probe_never_opens_database(api, monkeypatch):
+    client, module = api
+    client.headers.pop('X-API-Key')
+
+    def database_must_not_be_opened(*args, **kwargs):
+        raise AssertionError('liveness probes must not access the database')
+
+    monkeypatch.setattr(module, 'SessionLocal', database_must_not_be_opened)
+    monkeypatch.setattr(module.engine, 'connect', database_must_not_be_opened)
+    for method in ('GET', 'HEAD'):
+        response = client.request(method, '/ping')
+        assert response.status_code == 204
+        assert response.content == b''
+        assert response.headers['cache-control'] == 'no-store'
+
+
 def test_input_validation_and_null_update(api):
     client, _ = api
     pet_id = pet(client)

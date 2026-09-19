@@ -17,7 +17,7 @@ from typing import Literal, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.security import APIKeyHeader
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine, text
@@ -219,6 +219,13 @@ def seed():
             db.execute(text("SELECT setval(pg_get_serial_sequence('products', 'id'), "
                             "COALESCE((SELECT MAX(id) FROM products), 1), "
                             "EXISTS(SELECT 1 FROM products))"))
+
+
+@app.head("/ping", include_in_schema=False, status_code=204)
+@app.get("/ping", include_in_schema=False, status_code=204)
+def ping():
+    """Process liveness only: frequent probes must not keep Neon compute awake."""
+    return Response(status_code=204, headers={"Cache-Control": "no-store"})
 
 
 @app.head("/health", include_in_schema=False)

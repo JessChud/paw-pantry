@@ -6,7 +6,7 @@ Private single-owner pet profiles, supply estimates, and a public pet-supply cat
 
 Use Python 3.14 (Render runtime; tests also run on 3.12). Install `requirements.txt`, set `PAW_PANTRY_API_KEY` to a private random value, and run `uvicorn app:app`. Without `DATABASE_URL`, local development uses SQLite. Production must set `DATABASE_URL` to the Neon TLS connection URL. Never commit or share either secret.
 
-Public pages: `/`, `/catalog`, `/guide`, `/guides/{slug}`, `/calculator`, `/about`, `/privacy`, `/terms`, `/docs`, `/openapi.json`. `/health` checks database connectivity. Pet and product API requests require the `X-API-Key` header; Swagger's Authorize button accepts it. Missing or incorrect credentials return 401.
+Public pages: `/`, `/catalog`, `/guide`, `/guides/{slug}`, `/calculator`, `/about`, `/privacy`, `/terms`, `/docs`, `/openapi.json`. `/health` checks database connectivity. `/ping` returns an uncached 204 for process liveness without touching the database. Pet and product API requests require the `X-API-Key` header; Swagger's Authorize button accepts it. Missing or incorrect credentials return 401.
 
 ## Current connector scope
 
@@ -42,3 +42,9 @@ Install `requirements-dev.txt`, then run `python -m pytest tests -q`. Tests use 
 Render uses `main`, `pip install -r requirements.txt`, and `uvicorn app:app --host 0.0.0.0 --port $PORT`. Keep auto-deploy set to On Commit and the Render GitHub app restricted to this repository. After a push, confirm Render shows the new commit deployed, `/health` succeeds, and the public catalog displays the expected products. The free Render service can sleep; persistent data does not eliminate cold starts.
 
 For credential rotation, the owner must replace `PAW_PANTRY_API_KEY` in Render and every authorized connector configuration using it, then redeploy and verify the old key no longer works. Never paste the key into chat or commit it to GitHub.
+
+## Free hosting availability
+
+Use `/ping` for frequent external availability checks and Render's Health Check Path. Leave `/health` for on-demand database diagnostics: querying it every few seconds prevents Neon's idle compute from suspending. Startup still connects to the database and seeds the catalog before accepting traffic.
+
+A proposed external schedule is one GET to `https://paw-pantry.onrender.com/ping` every five minutes, with no credentials, cookies, browser execution, or affiliate-link visits. The scheduler must be enabled and its execution history verified separately; deploying this endpoint alone does not enable a schedule. Free hosting can still restart or sleep after missed requests, and Render's 750 monthly free instance hours are shared across the workspace. This is a best-effort workaround, not an uptime guarantee or exemption from provider usage rules.

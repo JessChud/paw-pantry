@@ -232,8 +232,8 @@ def test_chewy_pending_cannot_publish_even_with_a_link(api, monkeypatch):
         assert client.get('/products').json()[0]['chewy_link_available'] is False
         page = client.get('/catalog').text
         assert 'tracking.example' not in page
-        assert 'View on Amazon (affiliate link)' in page
-        assert ('Chewy links are coming soon' in page) == (status == 'in_review')
+        assert 'Check on Amazon' in page
+        assert 'Chewy links are coming soon' not in page
 
 
 def test_verified_chewy_link_is_consistent_in_api_and_catalog(api, monkeypatch):
@@ -247,7 +247,8 @@ def test_verified_chewy_link_is_consistent_in_api_and_catalog(api, monkeypatch):
     assert 'Amazon Associate' not in response.json()['disclosure']
     assert response.json()['product']['chewy_link_available'] is True
     page = client.get('/catalog').text
-    assert 'View on Chewy (affiliate link)' in page
+    assert 'Check on Chewy' in page
+    assert 'Affiliate link — Paw Pantry may earn a commission.' in page
     assert 'variant=5lb&amp;source=website' in page
     assert 'Chewy links are coming soon' not in page
     client.headers.pop('X-API-Key')
@@ -271,7 +272,7 @@ def test_unverified_chewy_links_never_publish(api, monkeypatch, bad_url):
         db.get(module.Product, 1).chewy_url = bad_url
     assert client.get('/products/1/link?retailer=chewy').status_code == 409
     assert client.get('/products').json()[0]['chewy_link_available'] is False
-    assert 'View on Chewy (affiliate link)' not in client.get('/catalog').text
+    assert 'Check on Chewy' not in client.get('/catalog').text
 
 
 def test_chewy_requires_variant_record_and_blocks_retired_products(api, monkeypatch):

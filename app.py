@@ -303,13 +303,14 @@ def public_catalog(q: str = Query(default="", max_length=200),
         links = []
         source = sources.get(str(p.id), {})
         if valid_amazon_link(p.amazon_url):
-            links.append(f'<a class="link" rel="sponsored nofollow noopener" href="{escape(p.amazon_url, quote=True)}">View on Amazon (affiliate link)</a>')
+            links.append(f'<div class="retailer"><a class="link" rel="sponsored nofollow noopener" href="{escape(p.amazon_url, quote=True)}">Check on Amazon</a>'
+                         '<p class="link-disclosure">Affiliate link — Paw Pantry may earn a commission.</p></div>')
         if valid_chewy_link(p.chewy_url, source, program):
-            links.append(f'<a class="link" rel="sponsored nofollow noopener" href="{escape(p.chewy_url, quote=True)}">View on Chewy (affiliate link)</a>')
+            links.append(f'<div class="retailer"><a class="link" rel="sponsored nofollow noopener" href="{escape(p.chewy_url, quote=True)}">Check on Chewy</a>'
+                         '<p class="link-disclosure">Affiliate link — Paw Pantry may earn a commission.</p></div>')
         if not links:
             if source.get("url"):
                 links.append(f'<a class="link" rel="noopener" href="{escape(source["url"], quote=True)}">Product information (not an affiliate link)</a>')
-            links.append('<p class="pending">Affiliate purchase link not available yet.</p>')
         pet_icon = p.species if p.species in {"dog", "cat", "rabbit", "fish", "bird", "hamster", "reptile"} else "paw"
         cards.append(f'<article id="product-{p.id}"><p class="tag">'
                      f'<img class="pet-icon" src="/static/pets/{pet_icon}.svg" width="38" height="38" alt="" aria-hidden="true" loading="lazy">'
@@ -326,8 +327,6 @@ def public_catalog(q: str = Query(default="", max_length=200),
         "{{SPECIES}}": options({p.species for p in all_products}, species, "All pets"),
         "{{CATEGORIES}}": options({p.category for p in all_products}, category, "All categories"),
         "{{COUNT}}": str(len(products)),
-        "{{CHEWYSTATUS}}": ('<p class="pending">Chewy links are coming soon, subject to affiliate approval.</p>'
-                            if program.get("status") == "in_review" else ""),
         "{{PRODUCTS}}": ''.join(cards) or '<p>No matching products yet. Try a broader search.</p>',
     }
     return re.sub(r"\{\{[A-Z]+\}\}", lambda match: replacements.get(match.group(), match.group()), page)

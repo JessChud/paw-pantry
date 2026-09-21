@@ -276,7 +276,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry Connector API", version="0.9.0", lifespan=lifespan,
+    title="Paw Pantry Connector API", version="0.10.0", lifespan=lifespan,
     description="Stateless pet-supply search and refill estimates for Muse. "
                 "The connector cannot read or write Paw Pantry's private pet workspace. "
                 "Retailer actions open only after the user chooses them, and the supplied "
@@ -517,7 +517,9 @@ def product_search_score(product: Product, query: str) -> int:
                 for word in available):
             score += 2
         for alias in SEARCH_ALIASES.get(token, ()):
-            if alias in available or alias in {product.species, product.category}:
+            if alias == product.category:
+                score += 12
+            elif alias in available or alias == product.species:
                 score += 4
         if (token in PRODUCT_TYPE_TERMS
                 and title_tokens & PRODUCT_TYPE_TITLE_ALIASES.get(token, {token})):
@@ -582,7 +584,9 @@ def intent_search_score(intent: dict, query: str) -> int:
                 for word in available):
             score += 2
         for alias in SEARCH_ALIASES.get(token, ()):
-            if alias in available or alias in {intent["species"], intent["category"]}:
+            if alias == intent["category"]:
+                score += 12
+            elif alias in available or alias == intent["species"]:
                 score += 4
         if (token in PRODUCT_TYPE_TERMS
                 and title_tokens & PRODUCT_TYPE_TITLE_ALIASES.get(token, {token})):
@@ -1217,7 +1221,7 @@ def muse_openapi():
     ]
     schema = get_openapi(
         title="Paw Pantry Connector API",
-        version="0.9.0",
+        version="0.10.0",
         description=("Stateless pet-supply search and refill estimates for Muse. "
                      "This contract cannot access Paw Pantry's private pet-profile workspace. "
                      "Inventory matches include a first-party Paw Pantry guidance page and a "

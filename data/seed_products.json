@@ -1428,5 +1428,49 @@
     "notes": "Amazon listing checked September 21, 2026. Paw Pantry has not tested this product. Confirm the exact variant, ingredients or materials, intended species, seller, price, and availability before buying.",
     "amazon_url": "https://www.amazon.com/dp/B07D5FTGP7/ref=nosim?tag=pawpantry-20",
     "chewy_url": ""
+  },
+  {
+    "id": 131,
+    "name": "Royal Canin Feline Health Nutrition Indoor 7+ Mature Dry Cat Food, 5.5 lb Bag",
+    "brand": "",
+    "species": "cat",
+    "category": "food",
+    "package_size": "See the current Amazon listing for the exact size, count, flavor, or model.",
+    "notes": "Amazon listing checked September 21, 2026. Paw Pantry has not tested this product. Confirm the exact variant, ingredients or materials, intended species, seller, price, and availability before buying.",
+    "amazon_url": "https://www.amazon.com/dp/B000HALT80/ref=nosim?tag=pawpantry-20",
+    "chewy_url": ""
+  },
+  {
+    "id": 132,
+    "name": "Purina Fancy Feast Senior 7+ Wet Cat Food Variety Pack, 3 oz, 24-Pack",
+    "brand": "",
+    "species": "cat",
+    "category": "food",
+    "package_size": "See the current Amazon listing for the exact size, count, flavor, or model.",
+    "notes": "Amazon listing checked September 21, 2026. Paw Pantry has not tested this product. Confirm the exact variant, ingredients or materials, intended species, seller, price, and availability before buying.",
+    "amazon_url": "https://www.amazon.com/dp/B0841H1XX6/ref=nosim?tag=pawpantry-20",
+    "chewy_url": ""
+  },
+  {
+    "id": 133,
+    "name": "Whole Life Cat Just One Chicken Freeze Dried Cat Treats - Human Grade High Protein Food, Healthy Training Snacks, Freeze Dried Chicken Food Toppers, USA Made Natural Treats - 4 oz (Pack of 1)",
+    "brand": "",
+    "species": "cat",
+    "category": "treats",
+    "package_size": "See the current Amazon listing for the exact size, count, flavor, or model.",
+    "notes": "Amazon listing checked September 21, 2026. Paw Pantry has not tested this product. Confirm the exact variant, ingredients or materials, intended species, seller, price, and availability before buying.",
+    "amazon_url": "https://www.amazon.com/dp/B00ATWNJIY/ref=nosim?tag=pawpantry-20",
+    "chewy_url": ""
+  },
+  {
+    "id": 134,
+    "name": "Vital Essentials Freeze Dried Minnows Cat Treats, 1.0 oz Bag",
+    "brand": "",
+    "species": "cat",
+    "category": "treats",
+    "package_size": "See the current Amazon listing for the exact size, count, flavor, or model.",
+    "notes": "Amazon listing checked September 21, 2026. Paw Pantry has not tested this product. Confirm the exact variant, ingredients or materials, intended species, seller, price, and availability before buying.",
+    "amazon_url": "https://www.amazon.com/dp/B0CLYMSQZQ/ref=nosim?tag=pawpantry-20",
+    "chewy_url": ""
   }
 ]

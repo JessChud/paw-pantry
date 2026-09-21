@@ -248,22 +248,47 @@ def test_product_search_understands_common_pet_language(api):
     assert client.get('/shopping-options', params={'q': 'x' * 201}).status_code == 422
 
 
+@pytest.mark.parametrize(('query', 'expected_product_species', 'expected_intent'), [
+    ('terrarium substrate for leopard gecko', 'reptile', 'Reptile substrate'),
+    ('hay for my rabbit', 'rabbit', 'Timothy hay'),
+    ('cage cleaner for my bird', 'bird', 'Cage cleaning brush'),
+    ('indestructible toy for a power chewer', 'dog', 'Durable chew toy'),
+])
+def test_open_ended_search_ranks_species_and_category_signals(
+        api, query, expected_product_species, expected_intent):
+    client, _ = api
+    result = client.get('/shopping-options', params={'q': query}).json()
+    assert result['curated_products'][0]['species'] == expected_product_species
+    assert result['matched_inventory'][0]['title'] == expected_intent
+
+
+@pytest.mark.parametrize(('query', 'expected_fragment'), [
+    ('senior cat food', 'Senior'),
+    ('freeze-dried cat treats', 'Freeze Dried'),
+])
+def test_new_catalog_gaps_surface_exact_product_types(api, query, expected_fragment):
+    client, _ = api
+    result = client.get('/shopping-options', params={'q': query}).json()
+    assert expected_fragment in result['curated_products'][0]['name']
+    assert result['curated_products'][0]['verified_amazon_product_link'] is True
+
+
 def test_catalog_stats_are_honest_and_public(api):
     client, _ = api
     client.headers.pop('X-API-Key')
     stats = client.get('/catalog-stats').json()
-    assert stats['active_curated_products'] == 125
+    assert stats['active_curated_products'] == 129
     assert stats['retired_products'] == 5
     assert stats['shopping_intents'] == 2771
-    assert stats['verified_amazon_products'] == 123
-    assert stats['affiliate_enabled_active_products'] == 125
+    assert stats['verified_amazon_products'] == 127
+    assert stats['affiliate_enabled_active_products'] == 129
     assert stats['affiliate_enabled_intents'] == 2771
     assert stats['verified_chewy_products'] == 0
     assert stats['species_counts']['dog'] == 42
-    assert stats['species_counts']['cat'] == 33
+    assert stats['species_counts']['cat'] == 37
     assert stats['species_counts']['fish'] == 11
     assert stats['species_counts']['bird'] == 8
-    assert stats['category_counts']['food'] == 28
+    assert stats['category_counts']['food'] == 30
     assert stats['category_counts']['toys'] == 15
     assert stats['shopping_species_counts']['dog'] == 473
     assert stats['shopping_species_counts']['guinea-pig'] == 66
@@ -309,9 +334,9 @@ def test_inventory_is_product_type_coverage_not_fake_retail_stock(api):
 def test_every_active_product_and_inventory_concept_has_affiliate_path(api):
     client, _ = api
     products = client.get('/products', params={'limit': 200}).json()
-    assert len(products) == 125
+    assert len(products) == 129
     assert all(product['amazon_link_available'] for product in products)
-    assert sum(product['verified_amazon_product_link'] for product in products) == 123
+    assert sum(product['verified_amazon_product_link'] for product in products) == 127
     assert sum(product['affiliate_search_available'] for product in products) == 2
     assert all(any(option['retailer'] == 'amazon' and option['affiliate']
                    for option in product['retailer_options']) for product in products)

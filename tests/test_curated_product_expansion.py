@@ -13,14 +13,14 @@ def test_reviewed_amazon_expansion_is_complete_and_synchronized():
     products = json.loads((ROOT / 'data/seed_products.json').read_text())
     sources = json.loads((ROOT / 'data/catalog_sources.json').read_text())
 
-    assert len(expansion) == 100
-    assert len({row[0] for row in expansion}) == 100
+    assert len(expansion) == 104
+    assert len({row[0] for row in expansion}) == 104
     assert all(re.fullmatch(r'[A-Z0-9]{10}', row[0]) for row in expansion)
     assert all(len(row) == 4 and all(isinstance(value, str) and value.strip()
                                      for value in row) for row in expansion)
 
-    expansion_products = [product for product in products if 31 <= product['id'] <= 130]
-    assert len(expansion_products) == 100
+    expansion_products = [product for product in products if 31 <= product['id'] <= 134]
+    assert len(expansion_products) == 104
     for product, (asin, title, species, category) in zip(expansion_products, expansion):
         source = sources[str(product['id'])]
         parsed = urlparse(product['amazon_url'])

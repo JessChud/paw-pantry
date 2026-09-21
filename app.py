@@ -447,10 +447,12 @@ SEARCH_ALIASES = {
     "bunny": ("rabbit",), "bunnies": ("rabbit",),
     "parakeet": ("bird",), "cockatiel": ("bird",),
     "guinea": ("guinea-pig",), "cavy": ("guinea-pig",),
+    "gecko": ("reptile",), "lizard": ("reptile",), "snake": ("reptile",),
+    "terrarium": ("reptile", "habitat"), "substrate": ("bedding", "habitat"),
     "aquarium": ("fish", "habitat"), "tank": ("fish", "habitat"),
-    "feed": ("food",), "hungry": ("food",), "kibble": ("food",),
+    "feed": ("food",), "hungry": ("food",), "kibble": ("food",), "hay": ("food",),
     "snack": ("treats",), "snacks": ("treats",), "training": ("treats",),
-    "chew": ("toys",), "chewer": ("toys",), "play": ("toys",),
+    "chew": ("toys",), "chewer": ("dog", "toys"), "play": ("toys",),
     "scratch": ("toys",), "scratching": ("toys",),
     "poop": ("supplies", "waste", "bags"), "waste": ("supplies", "bags"),
     "bath": ("grooming",), "shampoo": ("grooming",), "brush": ("grooming",),
@@ -460,7 +462,8 @@ SEARCH_ALIASES = {
     "leash": ("leashes",), "harness": ("leashes",), "collar": ("leashes",),
     "flea": ("flea-tick",), "tick": ("flea-tick",),
     "bowl": ("feeding",), "fountain": ("feeding",),
-    "stain": ("cleaning",), "odor": ("cleaning",),
+    "stain": ("cleaning",), "odor": ("cleaning",), "cleaner": ("cleaning",),
+    "wipes": ("cleaning", "grooming"),
 }
 SEARCH_STOPWORDS = {"a", "an", "and", "for", "i", "is", "me", "my", "of", "on",
                     "please", "the", "to", "what", "with"}
@@ -483,7 +486,9 @@ def product_search_score(product: Product, query: str) -> int:
     for token in requested:
         if token in available:
             score += 6
-        elif any(token in word or word in token for word in available):
+        elif len(token) >= 4 and any(
+                len(word) >= 4 and (token in word or word in token)
+                for word in available):
             score += 2
         for alias in SEARCH_ALIASES.get(token, ()):
             if alias in available or alias in {product.species, product.category}:
@@ -532,7 +537,9 @@ def intent_search_score(intent: dict, query: str) -> int:
     for token in requested:
         if token in available:
             score += 6
-        elif any(token in word or word in token for word in available):
+        elif len(token) >= 4 and any(
+                len(word) >= 4 and (token in word or word in token)
+                for word in available):
             score += 2
         for alias in SEARCH_ALIASES.get(token, ()):
             if alias in available or alias in {intent["species"], intent["category"]}:

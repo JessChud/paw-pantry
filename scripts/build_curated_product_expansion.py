@@ -1,4 +1,4 @@
-"""Synchronize the reviewed 100-product Amazon expansion into catalog data.
+"""Synchronize the reviewed Amazon expansion into catalog data.
 
 The source file contains ASINs and exact listing titles manually reviewed in
 Amazon search results on 2026-09-21. This builder performs no network requests
@@ -16,6 +16,7 @@ EXPANSION_PATH = ROOT / "data" / "amazon_product_expansion.json"
 PRODUCTS_PATH = ROOT / "data" / "seed_products.json"
 SOURCES_PATH = ROOT / "data" / "catalog_sources.json"
 FIRST_EXPANSION_ID = 31
+EXPECTED_EXPANSION_RECORDS = 104
 CHECKED_DATE = "2026-09-21"
 AFFILIATE_TAG = "pawpantry-20"
 FORMAT_SOURCE = "https://affiliate-program.amazon.com/help/node/topic/GJMMT7G4C8K4Y3AY"
@@ -26,8 +27,10 @@ def build() -> None:
     products = json.loads(PRODUCTS_PATH.read_text())
     sources = json.loads(SOURCES_PATH.read_text())
 
-    if len(expansion) != 100:
-        raise SystemExit(f"Expected exactly 100 reviewed products; found {len(expansion)}")
+    if len(expansion) != EXPECTED_EXPANSION_RECORDS:
+        raise SystemExit(
+            f"Expected exactly {EXPECTED_EXPANSION_RECORDS} reviewed products; found {len(expansion)}"
+        )
 
     existing_products = [p for p in products if p["id"] < FIRST_EXPANSION_ID]
     existing_asins = {

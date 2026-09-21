@@ -21,7 +21,7 @@ Supported examples:
   20 pet types. These records improve request understanding but are not
   represented as live retailer inventory, tested products, or suitability guarantees.
 - Give every active curated product and every shopping-intent record a tagged Amazon
-  path. The 123 checked ASIN links remain identified as verified product links; the
+  path. The 127 checked ASIN links remain identified as verified product links; the
   other paths are labeled as changing Amazon searches, never exact products.
 - Handle open-ended requests through `/shopping-options`. It returns ranked curated
   matches plus a tagged Amazon search-results action for broader choice. The search
@@ -50,8 +50,8 @@ The public site also offers ten original AI-assisted planning guides and a brows
 ## Search and inventory
 
 `/catalog-stats` reports the current inventory without authentication. The curated
-seed has 130 stable records: 125 active products, five retained retired variants,
-123 active checked Amazon product links, and no active Chewy links. The curated set
+seed has 134 stable records: 129 active products, five retained retired variants,
+127 active checked Amazon product links, and no active Chewy links. The curated set
 covers nine species groupings and 17 supply categories. A separate 2,771-record shopping-intent
 library covers 20 pet types across 23 categories. `/inventory` searches that coverage
 library, while `/shopping-options` combines it with curated products and tagged Amazon
@@ -71,9 +71,9 @@ Optional settings are
 
 `data/seed_products.json` contains stable product IDs. Startup updates those managed IDs and inserts new ones in a transaction; it preserves pets, supplies, and other product rows. Never recycle an ID for a different product. Schema changes need a separate migration plan; startup table creation does not migrate existing columns.
 
-`data/catalog_sources.json` records source pages, Amazon ASINs, checked variants, and link provenance. Five older package/variant records are retired from browsing and search but retained in the database for existing supplies; their alternatives have new IDs. 123 checked Amazon product links are currently configured. Two active entries lack checked ASIN links and therefore use clearly labeled tagged Amazon searches instead of guessed product URLs. Chewy approval is pending. Use only checked product ASINs with Amazon’s documented tagged text-link format; do not guess product IDs or advertise approval that has not been received.
+`data/catalog_sources.json` records source pages, Amazon ASINs, checked variants, and link provenance. Five older package/variant records are retired from browsing and search but retained in the database for existing supplies; their alternatives have new IDs. 127 checked Amazon product links are currently configured. Two active entries lack checked ASIN links and therefore use clearly labeled tagged Amazon searches instead of guessed product URLs. Chewy approval is pending. Use only checked product ASINs with Amazon’s documented tagged text-link format; do not guess product IDs or advertise approval that has not been received.
 
-`data/amazon_product_expansion.json` contains the 100-product reviewed expansion added on September 21, 2026. `scripts/build_curated_product_expansion.py` assigns its stable IDs 31–130 and deterministically synchronizes both catalog files without fetching Amazon or using the Creators API. When adding another batch, verify the displayed title and ASIN first, append new stable records without reusing IDs, and update the builder's ID range rather than replacing an existing product.
+`data/amazon_product_expansion.json` contains the reviewed expansion added on September 21, 2026. `scripts/build_curated_product_expansion.py` assigns its stable IDs from 31 onward and deterministically synchronizes both catalog files without fetching Amazon or using the Creators API. When adding another batch, verify the displayed title and ASIN first, append new stable records without reusing IDs, and update the builder's expected count rather than replacing an existing product.
 
 `data/shopping_intent_seeds.json` is the reviewed core coverage set. `scripts/build_shopping_inventory.py` adds constraint variants and additional companion-animal concepts, then deterministically writes `data/shopping_intents.json`. Run the builder and review its count before committing inventory changes. Variants expand query coverage; they do not become claims of live stock, product testing, price, ratings, or suitability.
 

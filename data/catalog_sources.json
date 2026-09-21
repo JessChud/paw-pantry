@@ -1250,5 +1250,45 @@
     "affiliate_link_method": "Amazon documented tagged text-link format; pawpantry-20",
     "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GJMMT7G4C8K4Y3AY",
     "catalog_status": "active"
+  },
+  "131": {
+    "amazon_asin": "B000HALT80",
+    "amazon_product_url": "https://www.amazon.com/dp/B000HALT80",
+    "amazon_checked": "2026-09-21",
+    "verified_variant": "Royal Canin Feline Health Nutrition Indoor 7+ Mature Dry Cat Food, 5.5 lb Bag",
+    "amazon_link_source": "Amazon search listing reviewed September 21, 2026; ASIN and displayed title recorded manually.",
+    "affiliate_link_method": "Amazon documented tagged text-link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GJMMT7G4C8K4Y3AY",
+    "catalog_status": "active"
+  },
+  "132": {
+    "amazon_asin": "B0841H1XX6",
+    "amazon_product_url": "https://www.amazon.com/dp/B0841H1XX6",
+    "amazon_checked": "2026-09-21",
+    "verified_variant": "Purina Fancy Feast Senior 7+ Wet Cat Food Variety Pack, 3 oz, 24-Pack",
+    "amazon_link_source": "Amazon search listing reviewed September 21, 2026; ASIN and displayed title recorded manually.",
+    "affiliate_link_method": "Amazon documented tagged text-link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GJMMT7G4C8K4Y3AY",
+    "catalog_status": "active"
+  },
+  "133": {
+    "amazon_asin": "B00ATWNJIY",
+    "amazon_product_url": "https://www.amazon.com/dp/B00ATWNJIY",
+    "amazon_checked": "2026-09-21",
+    "verified_variant": "Whole Life Cat Just One Chicken Freeze Dried Cat Treats - Human Grade High Protein Food, Healthy Training Snacks, Freeze Dried Chicken Food Toppers, USA Made Natural Treats - 4 oz (Pack of 1)",
+    "amazon_link_source": "Amazon search listing reviewed September 21, 2026; ASIN and displayed title recorded manually.",
+    "affiliate_link_method": "Amazon documented tagged text-link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GJMMT7G4C8K4Y3AY",
+    "catalog_status": "active"
+  },
+  "134": {
+    "amazon_asin": "B0CLYMSQZQ",
+    "amazon_product_url": "https://www.amazon.com/dp/B0CLYMSQZQ",
+    "amazon_checked": "2026-09-21",
+    "verified_variant": "Vital Essentials Freeze Dried Minnows Cat Treats, 1.0 oz Bag",
+    "amazon_link_source": "Amazon search listing reviewed September 21, 2026; ASIN and displayed title recorded manually.",
+    "affiliate_link_method": "Amazon documented tagged text-link format; pawpantry-20",
+    "affiliate_format_source": "https://affiliate-program.amazon.com/help/node/topic/GJMMT7G4C8K4Y3AY",
+    "catalog_status": "active"
   }
 }

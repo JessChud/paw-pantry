@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 def api(tmp_path, monkeypatch):
     monkeypatch.setenv('DATABASE_URL', 'sqlite:///' + str(tmp_path / 'test.db'))
     monkeypatch.setenv('PAW_PANTRY_API_KEY', 'test-only-secret')
+    monkeypatch.setenv('MUSE_CONNECTOR_API_KEY', 'test-muse-secret')
     sys.path.insert(0, str(Path(__file__).parents[1]))
     sys.modules.pop('app', None)
     module = importlib.import_module('app')
@@ -37,7 +38,48 @@ def test_auth_and_schema(api):
     assert client.get('/pets', headers={'X-API-Key': 'wrong'}).status_code == 401
     assert client.get('/health').json() == {'ok': True}
     schema = client.get('/openapi.json').json()
+    assert schema['info']['title'] == 'Paw Pantry Connector API'
     assert schema['components']['securitySchemes']['APIKeyHeader']['name'] == 'X-API-Key'
+    assert set(schema['paths']) == {
+        '/health', '/ready', '/products', '/catalog-stats', '/shopping-options',
+        '/products/{product_id}/link', '/refill-estimate',
+    }
+    assert not any(path.startswith('/pets') for path in schema['paths'])
+
+
+def test_connector_key_is_limited_to_stateless_operations(api):
+    client, module = api
+    connector_headers = {'X-API-Key': 'test-muse-secret'}
+    assert client.get('/ready').json() == {
+        'ready': True, 'scope': 'stateless-muse-connector'
+    }
+    assert client.get('/products', headers=connector_headers).status_code == 200
+    before = module.SessionLocal().query(module.PetSupply).count()
+    bought = date.today() - timedelta(days=2)
+    response = client.post('/refill-estimate', headers=connector_headers, json={
+        'purchase_date': bought.isoformat(),
+        'package_amount': 80,
+        'daily_use': 8,
+        'unit': 'oz',
+        'reorder_lead_days': 3,
+    })
+    assert response.status_code == 200
+    assert response.json()['days_total'] == 10
+    assert response.json()['days_left'] == 8
+    assert response.json()['runs_out'] == (bought + timedelta(days=10)).isoformat()
+    assert module.SessionLocal().query(module.PetSupply).count() == before
+    assert client.get('/pets', headers=connector_headers).status_code == 401
+    assert client.post('/pets', headers=connector_headers,
+                       json={'name': 'Muse pet', 'species': 'dog'}).status_code == 401
+
+
+def test_owner_and_connector_keys_must_differ(tmp_path, monkeypatch):
+    monkeypatch.setenv('DATABASE_URL', 'sqlite:///' + str(tmp_path / 'same-key.db'))
+    monkeypatch.setenv('PAW_PANTRY_API_KEY', 'same-secret')
+    monkeypatch.setenv('MUSE_CONNECTOR_API_KEY', 'same-secret')
+    sys.modules.pop('app', None)
+    with pytest.raises(RuntimeError, match='must differ'):
+        importlib.import_module('app')
 
 
 def test_availability_checks_support_head_and_detect_database_failure(api):

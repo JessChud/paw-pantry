@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.openapi.utils import get_openapi
 from fastapi.security import APIKeyHeader
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -29,8 +30,15 @@ from semantic_search import SemanticRanker
 BASE_DIR = Path(__file__).parent
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR}/pawpantry.db")
 API_KEY = os.getenv("PAW_PANTRY_API_KEY", "")
+MUSE_CONNECTOR_API_KEY = os.getenv("MUSE_CONNECTOR_API_KEY", "")
 if not API_KEY or API_KEY == "dev-key-change-me":
     raise RuntimeError("Set a private PAW_PANTRY_API_KEY before starting Paw Pantry.")
+if MUSE_CONNECTOR_API_KEY and compare_digest(
+        MUSE_CONNECTOR_API_KEY.encode(), API_KEY.encode()):
+    raise RuntimeError(
+        "MUSE_CONNECTOR_API_KEY must differ from PAW_PANTRY_API_KEY so the "
+        "connector cannot access private pet records."
+    )
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
@@ -200,6 +208,37 @@ class CatalogStats(BaseModel):
     semantic_model: Optional[str]
 
 
+class RefillEstimateRequest(InputModel):
+    purchase_date: date
+    package_amount: float = Field(gt=0, le=1000000)
+    daily_use: float = Field(gt=0, le=1000000)
+    unit: str = Field(min_length=1, max_length=24)
+    reorder_lead_days: int = Field(default=5, ge=0, le=365)
+
+    @field_validator("purchase_date")
+    @classmethod
+    def valid_purchase_date(cls, value):
+        if not date(1900, 1, 1) <= value <= date.today():
+            raise ValueError("Use a purchase date from 1900 through today.")
+        return value
+
+    @model_validator(mode="after")
+    def reasonable_duration(self):
+        if self.package_amount / self.daily_use > 36500:
+            raise ValueError("Check the amounts and units: supply cannot exceed 100 years.")
+        return self
+
+
+class RefillEstimateResult(BaseModel):
+    days_total: float
+    days_left: float
+    runs_out: date
+    reorder_by: date
+    overdue: bool
+    unit: str
+    guidance: str
+
+
 @asynccontextmanager
 async def lifespan(application):
     seed()
@@ -208,12 +247,11 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry API", version="0.5.0", lifespan=lifespan,
-    description="Private single-owner prototype. All pet records share one API key. "
-                "Not suitable for unrelated users until user isolation is implemented. "
-                "Product search results include validated, user-initiated retailer options "
-                "that clients may render with the supplied affiliate disclosure. "
-                "Supply dates are estimates; no scheduled reminders or purchases are made."
+    title="Paw Pantry Connector API", version="0.6.0", lifespan=lifespan,
+    description="Stateless pet-supply search and refill estimates for Muse. "
+                "The connector cannot read or write Paw Pantry's private pet workspace. "
+                "Retailer actions open only after the user chooses them, and the supplied "
+                "affiliate disclosure must be displayed. No purchase is made by this API."
 )
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
@@ -229,6 +267,18 @@ def get_db():
 
 def require_key(x_api_key: Optional[str] = Depends(api_key_header)):
     if not x_api_key or not compare_digest(x_api_key.encode(), API_KEY.encode()):
+        raise HTTPException(status_code=401, detail="invalid api key")
+
+
+def require_connector_key(x_api_key: Optional[str] = Depends(api_key_header)):
+    """Accept the connector credential without granting access to private pet records."""
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="invalid api key")
+    supplied = x_api_key.encode()
+    valid_owner = compare_digest(supplied, API_KEY.encode())
+    valid_connector = bool(MUSE_CONNECTOR_API_KEY) and compare_digest(
+        supplied, MUSE_CONNECTOR_API_KEY.encode())
+    if not (valid_owner or valid_connector):
         raise HTTPException(status_code=401, detail="invalid api key")
 
 
@@ -467,6 +517,18 @@ def health(db: Session = Depends(get_db)):
     return {"ok": True}
 
 
+@app.get("/ready")
+def ready(db: Session = Depends(get_db)):
+    """Connector readiness without revealing credentials or database details."""
+    if not MUSE_CONNECTOR_API_KEY:
+        raise HTTPException(503, "Muse connector credential is not configured")
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        raise HTTPException(503, "database unavailable") from None
+    return {"ready": True, "scope": "stateless-muse-connector"}
+
+
 # ---- homepage + static legal pages (served so /, /privacy and /terms work on the free subdomain) ----
 @app.head("/", response_class=HTMLResponse, include_in_schema=False)
 @app.get("/", response_class=HTMLResponse)
@@ -497,6 +559,11 @@ def about():
 @app.get("/calculator", response_class=HTMLResponse)
 def calculator():
     return (BASE_DIR / "static" / "calculator.html").read_text()
+
+
+@app.get("/documentation", response_class=HTMLResponse, include_in_schema=False)
+def connector_documentation():
+    return (BASE_DIR / "static" / "documentation.html").read_text()
 
 
 @app.get("/guides/{slug}", response_class=HTMLResponse)
@@ -638,7 +705,7 @@ def runout(pet_id: int, db: Session = Depends(get_db)):
 
 
 # ---- catalog ----
-@app.get("/products", dependencies=[Depends(require_key)], response_model=list[CatalogProduct])
+@app.get("/products", dependencies=[Depends(require_connector_key)], response_model=list[CatalogProduct])
 def list_products(species: Optional[str] = Query(default=None, max_length=60),
                   category: Optional[str] = Query(default=None, max_length=60),
                   q: Optional[str] = Query(default=None, max_length=200),
@@ -680,7 +747,7 @@ def catalog_stats(db: Session = Depends(get_db)):
     }
 
 
-@app.get("/shopping-options", dependencies=[Depends(require_key)],
+@app.get("/shopping-options", dependencies=[Depends(require_connector_key)],
          response_model=ShoppingOptionsResult)
 def shopping_options(q: str = Query(min_length=2, max_length=200),
                      species: Optional[str] = Query(default=None, max_length=60),
@@ -707,7 +774,7 @@ def shopping_options(q: str = Query(min_length=2, max_length=200),
     }
 
 
-@app.get("/products/{product_id}/link", dependencies=[Depends(require_key)],
+@app.get("/products/{product_id}/link", dependencies=[Depends(require_connector_key)],
          response_model=ProductLinkResult)
 def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon", db: Session = Depends(get_db)):
     """Return one display-ready, user-initiated affiliate retailer action."""
@@ -728,6 +795,26 @@ def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon
             "destination": destination, "button_label": f"Check on {destination}",
             "affiliate": True, "opens_after_user_click": True,
             "rel": "sponsored nofollow noopener"}
+
+
+@app.post("/refill-estimate", dependencies=[Depends(require_connector_key)],
+          response_model=RefillEstimateResult)
+def refill_estimate(body: RefillEstimateRequest):
+    """Calculate a refill estimate without storing a pet profile or supply record."""
+    days_total = body.package_amount / body.daily_use
+    elapsed = (date.today() - body.purchase_date).days
+    days_left = round(days_total - elapsed, 1)
+    runs_out = body.purchase_date + timedelta(days=ceil(days_total))
+    return {
+        "days_total": round(days_total, 1),
+        "days_left": days_left,
+        "runs_out": runs_out,
+        "reorder_by": runs_out - timedelta(days=body.reorder_lead_days),
+        "overdue": days_left <= 0,
+        "unit": body.unit,
+        "guidance": ("Estimate only. Use the same unit for package amount and daily use, "
+                     "and check the actual supply before reordering."),
+    }
 
 
 # The private owner can inspect, correct, or retire a tracked supply.
@@ -766,3 +853,34 @@ def stop_tracking_supply(pet_id: int, supply_id: int, db: Session = Depends(get_
     db.delete(supply)
     db.commit()
     return {"deleted": supply_id}
+
+
+MUSE_OPENAPI_PATHS = {
+    "/health", "/ready", "/products", "/catalog-stats", "/shopping-options",
+    "/products/{product_id}/link", "/refill-estimate",
+}
+
+
+def muse_openapi():
+    """Publish only the stateless, connector-safe contract to Muse and Swagger."""
+    if app.openapi_schema:
+        return app.openapi_schema
+    connector_routes = [
+        route for route in app.routes
+        if getattr(route, "path", None) in MUSE_OPENAPI_PATHS
+    ]
+    schema = get_openapi(
+        title="Paw Pantry Connector API",
+        version="0.6.0",
+        description=("Stateless pet-supply search and refill estimates for Muse. "
+                     "This contract cannot access Paw Pantry's private pet-profile workspace. "
+                     "Show every returned affiliate disclosure beside its retailer action and "
+                     "open retailer URLs only after a user chooses them."),
+        routes=connector_routes,
+    )
+    schema["servers"] = [{"url": "https://paw-pantry.onrender.com"}]
+    app.openapi_schema = schema
+    return schema
+
+
+app.openapi = muse_openapi

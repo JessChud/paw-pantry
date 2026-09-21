@@ -4,17 +4,16 @@ Private single-owner pet profiles, supply estimates, and a public pet-supply cat
 
 ## Run locally
 
-Use Python 3.14 (Render runtime; tests also run on 3.12). Install `requirements.txt`, set `PAW_PANTRY_API_KEY` to a private random value, and run `uvicorn app:app`. Without `DATABASE_URL`, local development uses SQLite. Production must set `DATABASE_URL` to the Neon TLS connection URL. Never commit or share either secret.
+Use Python 3.14 (Render runtime; tests also run on 3.12). Install `requirements.txt`, set `PAW_PANTRY_API_KEY` and `MUSE_CONNECTOR_API_KEY` to different private random values, and run `uvicorn app:app`. Without `DATABASE_URL`, local development uses SQLite. Production must set `DATABASE_URL` to the Neon TLS connection URL. Never commit or share these secrets.
 
-Public pages: `/`, `/catalog`, `/guide`, `/guides/{slug}`, `/calculator`, `/about`, `/privacy`, `/terms`, `/docs`, `/openapi.json`. `/health` checks database connectivity. `/ping` returns an uncached 204 for process liveness without touching the database. Pet and product API requests require the `X-API-Key` header; Swagger's Authorize button accepts it. Missing or incorrect credentials return 401.
+Public pages: `/`, `/catalog`, `/guide`, `/guides/{slug}`, `/calculator`, `/about`, `/privacy`, `/terms`, `/documentation`, `/docs`, `/openapi.json`. `/health` checks database connectivity, `/ready` confirms the connector credential and database are configured, and `/ping` returns an uncached 204 for process liveness without touching the database. API requests use the `X-API-Key` header. Missing or incorrect credentials return 401.
 
 ## Current connector scope
 
-The Muse submission is under review. The API uses one shared owner key: it does **not** isolate unrelated users. Do not distribute that key to end users or enable public pet-profile use until per-user authentication and authorization are implemented.
+The published Muse contract is stateless and excludes every private pet-profile and supply-record route. Muse receives `MUSE_CONNECTOR_API_KEY`, which can call only catalog search, shopping options, retailer links, and the stateless refill estimator. The separate `PAW_PANTRY_API_KEY` remains required for all stored pet and supply operations. Startup fails if the two keys are equal.
 
 Supported examples:
 
-- Create or update a pet profile, including allergies and weight.
 - Search the starter catalog by species, category, or keyword. Each result includes
   validated `retailer_options` that Muse can render as direct external buttons with
   the supplied affiliate disclosure.
@@ -22,9 +21,7 @@ Supported examples:
   matches plus a tagged Amazon search-results action for broader choice. The search
   action is clearly identified as changing retailer results rather than a verified
   individual product recommendation.
-- Track a purchased supply using a purchase date, package amount, daily use, and matching unit.
-- Ask how many days remain and when to consider reordering.
-- Inspect, replace, or delete an existing tracked supply.
+- Calculate how many days remain and when to consider reordering without storing the inputs.
 - Get an available retailer link with its disclosure, without placing an order.
 
 There are no scheduled reminders, automatic orders, checkout, delivery tracking, live prices, veterinary recommendations, or automatic ingredient/allergy filtering. An allergy recorded in a profile does not certify any product as suitable. Reorder dates are estimates, including past dates for overdue supplies. Check actual supplies and the current label.
@@ -74,7 +71,7 @@ Install `requirements-dev.txt`, then run `python -m pytest tests -q`. Tests use 
 
 Render uses `main`, `pip install -r requirements.txt`, and `uvicorn app:app --host 0.0.0.0 --port $PORT`. Keep auto-deploy set to On Commit and the Render GitHub app restricted to this repository. After a push, confirm Render shows the new commit deployed, `/health` succeeds, and the public catalog displays the expected products. The free Render service can sleep; persistent data does not eliminate cold starts.
 
-For credential rotation, the owner must replace `PAW_PANTRY_API_KEY` in Render and every authorized connector configuration using it, then redeploy and verify the old key no longer works. Never paste the key into chat or commit it to GitHub.
+For credential rotation, replace the relevant key in Render and its authorized client, then redeploy and verify the old key no longer works. Rotating the Muse key does not affect the owner workspace; rotating the owner key does not affect Muse. Never paste either key into chat or commit it to GitHub.
 
 ## Free hosting availability
 

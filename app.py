@@ -320,6 +320,7 @@ def pet_to_dict(pet: Pet) -> dict:
     }
 
 
+@lru_cache(maxsize=1)
 def catalog_metadata():
     path = BASE_DIR / "data" / "catalog_sources.json"
     return json.loads(path.read_text()) if path.exists() else {}
@@ -373,6 +374,7 @@ def amazon_search_option(query_text: str, species: Optional[str] = None,
     }
 
 
+@lru_cache(maxsize=1)
 def chewy_program():
     path = BASE_DIR / "data" / "chewy_program.json"
     return json.loads(path.read_text()) if path.exists() else {}
@@ -1049,7 +1051,8 @@ def catalog_stats(db: Session = Depends(get_db)):
         "shopping_intents": len(intents),
         "verified_amazon_products": sum(valid_amazon_link(product.amazon_url)
                                         for product in active),
-        "affiliate_enabled_active_products": sum(bool(retailer_options(product))
+        "affiliate_enabled_active_products": sum(bool(retailer_options(
+            product, metadata.get(str(product.id), {})))
                                                  for product in active),
         "affiliate_enabled_intents": len(intents),
         "verified_chewy_products": sum(valid_chewy_link(

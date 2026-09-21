@@ -354,8 +354,9 @@ def test_expanded_catalog_surfaces_diverse_exact_products(api, query, species, c
 
 
 def test_catalog_stats_are_honest_and_public(api):
-    client, _ = api
+    client, module = api
     client.headers.pop('X-API-Key')
+    module.catalog_metadata.cache_clear()
     stats = client.get('/catalog-stats').json()
     assert stats['active_curated_products'] == 2000
     assert stats['retired_products'] == 5
@@ -386,6 +387,7 @@ def test_catalog_stats_are_honest_and_public(api):
     assert stats['first_party_recommendation_pages'] == 2771
     assert stats['semantic_search_enabled'] is False
     assert stats['semantic_model'] is None
+    assert module.catalog_metadata.cache_info().misses == 1
 
 
 @pytest.mark.parametrize(('query', 'expected'), [

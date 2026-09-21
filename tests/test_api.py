@@ -41,7 +41,7 @@ def test_auth_and_schema(api):
     assert schema['info']['title'] == 'Paw Pantry Connector API'
     assert schema['components']['securitySchemes']['APIKeyHeader']['name'] == 'X-API-Key'
     assert set(schema['paths']) == {
-        '/health', '/ready', '/products', '/catalog-stats', '/shopping-options',
+        '/health', '/ready', '/products', '/inventory', '/catalog-stats', '/shopping-options',
         '/products/{product_id}/link', '/refill-estimate',
     }
     assert not any(path.startswith('/pets') for path in schema['paths'])
@@ -220,6 +220,7 @@ def test_open_ended_shopping_search_is_ranked_and_has_broad_amazon_fallback(api)
     assert result['matching_method'] == 'keyword'
     assert result['semantic_model'] is None
     assert result['curated_products'][0]['name'] == 'Classic Stuffable Dog Toy'
+    assert result['matched_inventory'][0]['title'] == 'Durable chew toy'
     amazon = result['broader_amazon_search']
     assert amazon['kind'] == 'search'
     assert amazon['button_label'] == 'See more options on Amazon'
@@ -248,13 +249,43 @@ def test_catalog_stats_are_honest_and_public(api):
     stats = client.get('/catalog-stats').json()
     assert stats['active_curated_products'] == 25
     assert stats['retired_products'] == 5
+    assert stats['shopping_intents'] == 174
     assert stats['verified_amazon_products'] == 23
     assert stats['verified_chewy_products'] == 0
     assert stats['species_counts']['dog'] == 12
     assert stats['species_counts']['cat'] == 8
+    assert stats['shopping_species_counts']['dog'] == 61
+    assert stats['shopping_species_counts']['guinea-pig'] == 8
+    assert stats['shopping_category_counts']['food'] == 30
     assert stats['broader_amazon_search_enabled'] is True
     assert stats['semantic_search_enabled'] is False
     assert stats['semantic_model'] is None
+
+
+@pytest.mark.parametrize(('query', 'expected'), [
+    ('airline approved carrier for my cat', 'Cat carrier'),
+    ('self cleaning litter box', 'Self-cleaning litter box'),
+    ('water conditioner for my aquarium', 'Water conditioner'),
+    ('exercise wheel for my hamster', 'Hamster exercise wheel'),
+    ('hay for my guinea pig', 'Guinea pig hay'),
+    ('hands free leash for running', 'Hands-free running leash'),
+])
+def test_expanded_inventory_matches_common_requests(api, query, expected):
+    client, _ = api
+    response = client.get('/inventory', params={'q': query, 'limit': 5})
+    assert response.status_code == 200
+    assert response.json()[0]['title'] == expected
+
+
+def test_inventory_is_product_type_coverage_not_fake_retail_stock(api):
+    client, _ = api
+    result = client.get('/inventory', params={
+        'species': 'reptile', 'category': 'habitat', 'limit': 50,
+    }).json()
+    assert result
+    assert all(row['species'] in {'reptile', 'any'} for row in result)
+    assert all(row['category'] == 'habitat' for row in result)
+    assert all('url' not in row and 'price' not in row for row in result)
 
 
 def test_semantic_ranking_can_retrieve_without_keyword_overlap(api, monkeypatch):

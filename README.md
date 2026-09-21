@@ -17,6 +17,9 @@ Supported examples:
 - Search the starter catalog by species, category, or keyword. Each result includes
   validated `retailer_options` that Muse can render as direct external buttons with
   the supplied affiliate disclosure.
+- Match requests against 174 product-type coverage records spanning eight pet types
+  plus general supplies. These records improve request understanding but are not
+  represented as live retailer inventory, tested products, or suitability guarantees.
 - Handle open-ended requests through `/shopping-options`. It returns ranked curated
   matches plus a tagged Amazon search-results action for broader choice. The search
   action is clearly identified as changing retailer results rather than a verified
@@ -41,17 +44,20 @@ The public site also offers ten original AI-assisted planning guides and a brows
 
 ## Search and inventory
 
-`/catalog-stats` reports the current inventory without authentication. The current
-seed has 30 stable records: 25 active curated products, five retained retired variants,
-23 active verified Amazon product links, and no active Chewy links. The active set
-covers seven species and 14 supply categories. `/shopping-options` adds a broader
-tagged Amazon search for requests that exceed that curated set.
+`/catalog-stats` reports the current inventory without authentication. The curated
+seed has 30 stable records: 25 active products, five retained retired variants,
+23 active verified Amazon product links, and no active Chewy links. The curated set
+covers seven species and 14 supply categories. A separate 174-record shopping-intent
+library covers eight pet types plus general supplies across 23 categories. `/inventory`
+searches that coverage library, while `/shopping-options` combines it with curated
+products and a broader tagged Amazon search.
 
-When `OPENAI_API_KEY` is set, product search uses `text-embedding-3-small` with
-256-dimensional embeddings to combine semantic relevance with the offline keyword
-score. Catalog vectors are cached in memory; each request embeds only the query after
-the first catalog pass. If the API is unavailable or the key is absent, matching falls
-back automatically to the tested offline ranker. Optional settings are
+When `OPENAI_API_KEY` is set, product and shopping-intent search uses
+`text-embedding-3-small` with 256-dimensional embeddings to combine semantic relevance
+with the offline keyword score. Catalog vectors are cached in memory; each request
+embeds only the query after the first pass for each catalog. If the API is unavailable
+or the key is absent, matching falls back automatically to the tested offline ranker.
+Optional settings are
 `OPENAI_EMBEDDING_MODEL`, `OPENAI_EMBEDDING_DIMENSIONS`, and
 `OPENAI_EMBEDDING_TIMEOUT_SECONDS`. Never commit the API key.
 

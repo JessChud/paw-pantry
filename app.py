@@ -8,6 +8,7 @@ import os
 import re
 from contextlib import asynccontextmanager
 from datetime import date, timedelta
+from functools import lru_cache
 from hmac import compare_digest
 from html import escape
 from math import ceil
@@ -187,9 +188,19 @@ class ProductLinkResult(BaseModel):
     rel: str = "sponsored nofollow noopener"
 
 
+class InventoryConcept(BaseModel):
+    id: str
+    title: str
+    species: str
+    category: str
+    keywords: list[str]
+    guidance: str
+
+
 class ShoppingOptionsResult(BaseModel):
     query: str
     curated_products: list[CatalogProduct]
+    matched_inventory: list[InventoryConcept]
     broader_amazon_search: RetailerOption
     matching_method: Literal["keyword", "hybrid-semantic"]
     semantic_model: Optional[str]
@@ -199,10 +210,13 @@ class ShoppingOptionsResult(BaseModel):
 class CatalogStats(BaseModel):
     active_curated_products: int
     retired_products: int
+    shopping_intents: int
     verified_amazon_products: int
     verified_chewy_products: int
     species_counts: dict[str, int]
     category_counts: dict[str, int]
+    shopping_species_counts: dict[str, int]
+    shopping_category_counts: dict[str, int]
     broader_amazon_search_enabled: bool
     semantic_search_enabled: bool
     semantic_model: Optional[str]
@@ -247,7 +261,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry Connector API", version="0.6.0", lifespan=lifespan,
+    title="Paw Pantry Connector API", version="0.7.0", lifespan=lifespan,
     description="Stateless pet-supply search and refill estimates for Muse. "
                 "The connector cannot read or write Paw Pantry's private pet workspace. "
                 "Retailer actions open only after the user chooses them, and the supplied "
@@ -368,6 +382,7 @@ SEARCH_ALIASES = {
     "kitten": ("cat",), "kittens": ("cat",),
     "bunny": ("rabbit",), "bunnies": ("rabbit",),
     "parakeet": ("bird",), "cockatiel": ("bird",),
+    "guinea": ("guinea-pig",), "cavy": ("guinea-pig",),
     "aquarium": ("fish", "habitat"), "tank": ("fish", "habitat"),
     "feed": ("food",), "hungry": ("food",), "kibble": ("food",),
     "snack": ("treats",), "snacks": ("treats",), "training": ("treats",),
@@ -416,6 +431,68 @@ def product_embedding_text(product: Product) -> str:
     return (f"Pet species: {product.species}. Supply category: {product.category}. "
             f"Product: {product.brand} {product.name}. Package: {product.package_size}. "
             f"Details: {product.notes}")
+
+
+@lru_cache(maxsize=1)
+def inventory_concepts() -> list[dict]:
+    """Load broad shopping coverage records; these are product types, not live stock."""
+    rows = [InventoryConcept.model_validate(row).model_dump() for row in json.loads(
+        (BASE_DIR / "data" / "shopping_intents.json").read_text())]
+    ids = [row["id"] for row in rows]
+    if len(ids) != len(set(ids)):
+        raise ValueError("Shopping inventory IDs must be unique.")
+    return rows
+
+
+def intent_search_score(intent: dict, query: str) -> int:
+    requested = search_tokens(query)
+    if not requested:
+        return 1
+    text = " ".join((intent["title"], intent["species"], intent["category"],
+                     " ".join(intent["keywords"]))).lower()
+    available = set(search_tokens(text))
+    score = 20 if query.strip().lower() in text else 0
+    for token in requested:
+        if token in available:
+            score += 6
+        elif any(token in word or word in token for word in available):
+            score += 2
+        for alias in SEARCH_ALIASES.get(token, ()):
+            if alias in available or alias in text:
+                score += 4
+    return score
+
+
+def intent_embedding_text(intent: dict) -> str:
+    return (f"Pet species: {intent['species']}. Shopping category: {intent['category']}. "
+            f"Product type: {intent['title']}. Search terms: {' '.join(intent['keywords'])}. "
+            f"Selection guidance: {intent['guidance']}")
+
+
+def matching_intents(species: Optional[str], category: Optional[str],
+                     query_text: Optional[str], limit: int) -> tuple[list[dict], str]:
+    intents = [intent for intent in inventory_concepts()
+               if (not species or intent["species"] in {species.lower(), "any"})
+               and (not category or intent["category"] == category.lower())]
+    method = "keyword"
+    if query_text:
+        lexical = {intent["id"]: intent_search_score(intent, query_text) for intent in intents}
+        semantic = SEMANTIC_RANKER.rank(
+            query_text, {intent["id"]: intent_embedding_text(intent) for intent in intents})
+        if semantic:
+            method = "hybrid-semantic"
+            maximum = max(lexical.values(), default=0) or 1
+            combined = {
+                intent["id"]: (0.35 * lexical[intent["id"]] / maximum
+                               + 0.65 * max(0.0, semantic.get(intent["id"], 0.0)))
+                for intent in intents
+            }
+            intents = sorted(intents, key=lambda intent: (-combined[intent["id"]], intent["id"]))
+        else:
+            intents = [intent for intent in sorted(
+                intents, key=lambda intent: (-lexical[intent["id"]], intent["id"]))
+                if lexical[intent["id"]] > 0]
+    return intents[:limit], method
 
 
 def matching_products(db: Session, species: Optional[str], category: Optional[str],
@@ -731,9 +808,18 @@ def catalog_stats(db: Session = Depends(get_db)):
     for product in active:
         species_counts[product.species] = species_counts.get(product.species, 0) + 1
         category_counts[product.category] = category_counts.get(product.category, 0) + 1
+    intents = inventory_concepts()
+    shopping_species_counts = {}
+    shopping_category_counts = {}
+    for intent in intents:
+        shopping_species_counts[intent["species"]] = (
+            shopping_species_counts.get(intent["species"], 0) + 1)
+        shopping_category_counts[intent["category"]] = (
+            shopping_category_counts.get(intent["category"], 0) + 1)
     return {
         "active_curated_products": len(active),
         "retired_products": len(products) - len(active),
+        "shopping_intents": len(intents),
         "verified_amazon_products": sum(valid_amazon_link(product.amazon_url)
                                         for product in active),
         "verified_chewy_products": sum(valid_chewy_link(
@@ -741,10 +827,23 @@ def catalog_stats(db: Session = Depends(get_db)):
             for product in active),
         "species_counts": species_counts,
         "category_counts": category_counts,
+        "shopping_species_counts": shopping_species_counts,
+        "shopping_category_counts": shopping_category_counts,
         "broader_amazon_search_enabled": True,
         "semantic_search_enabled": SEMANTIC_RANKER.enabled,
         "semantic_model": SEMANTIC_RANKER.model if SEMANTIC_RANKER.enabled else None,
     }
+
+
+@app.get("/inventory", dependencies=[Depends(require_connector_key)],
+         response_model=list[InventoryConcept])
+def inventory(species: Optional[str] = Query(default=None, max_length=60),
+              category: Optional[str] = Query(default=None, max_length=60),
+              q: Optional[str] = Query(default=None, max_length=200),
+              limit: int = Query(default=25, ge=1, le=50)):
+    """Search broad product-type coverage; records are not live retailer stock."""
+    matches, _ = matching_intents(species, category, q, limit)
+    return matches
 
 
 @app.get("/shopping-options", dependencies=[Depends(require_connector_key)],
@@ -761,16 +860,21 @@ def shopping_options(q: str = Query(min_length=2, max_length=200),
     results, so the client must not describe it as a specific recommendation.
     """
     matches, method = matching_products(db, species, category, q, limit)
+    intents, intent_method = matching_intents(species, category, q, limit)
+    if intent_method == "hybrid-semantic":
+        method = intent_method
     products = [product_to_dict(p) for p in matches]
     return {
         "query": q,
         "curated_products": products,
+        "matched_inventory": intents,
         "broader_amazon_search": amazon_search_option(q, species, category),
         "matching_method": method,
         "semantic_model": SEMANTIC_RANKER.model if method == "hybrid-semantic" else None,
-        "guidance": ("Curated matches are examples, not suitability guarantees. Amazon search "
-                     "results can change. Check the current product, seller, price, ingredients "
-                     "or materials, size, and suitability before buying."),
+        "guidance": ("Inventory matches are product types, not live stock or suitability "
+                     "guarantees. Curated products are examples. Amazon search results can "
+                     "change. Check the current product, seller, price, ingredients or "
+                     "materials, size, and suitability before buying."),
     }
 
 
@@ -856,7 +960,7 @@ def stop_tracking_supply(pet_id: int, supply_id: int, db: Session = Depends(get_
 
 
 MUSE_OPENAPI_PATHS = {
-    "/health", "/ready", "/products", "/catalog-stats", "/shopping-options",
+    "/health", "/ready", "/products", "/inventory", "/catalog-stats", "/shopping-options",
     "/products/{product_id}/link", "/refill-estimate",
 }
 
@@ -871,7 +975,7 @@ def muse_openapi():
     ]
     schema = get_openapi(
         title="Paw Pantry Connector API",
-        version="0.6.0",
+        version="0.7.0",
         description=("Stateless pet-supply search and refill estimates for Muse. "
                      "This contract cannot access Paw Pantry's private pet-profile workspace. "
                      "Show every returned affiliate disclosure beside its retailer action and "

@@ -260,6 +260,8 @@ def test_open_ended_search_ranks_species_and_category_signals(
     result = client.get('/shopping-options', params={'q': query}).json()
     assert result['curated_products'][0]['species'] == expected_product_species
     assert result['matched_inventory'][0]['title'] == expected_intent
+    if 'substrate' in query:
+        assert 'substrate' in result['curated_products'][0]['name'].lower()
 
 
 @pytest.mark.parametrize(('query', 'expected_fragment'), [
@@ -271,6 +273,7 @@ def test_new_catalog_gaps_surface_exact_product_types(api, query, expected_fragm
     result = client.get('/shopping-options', params={'q': query}).json()
     assert expected_fragment in result['curated_products'][0]['name']
     assert result['curated_products'][0]['verified_amazon_product_link'] is True
+    assert all(product['species'] == 'cat' for product in result['curated_products'])
 
 
 def test_catalog_stats_are_honest_and_public(api):

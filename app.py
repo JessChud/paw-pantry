@@ -447,7 +447,7 @@ SEARCH_ALIASES = {
     "bunny": ("rabbit",), "bunnies": ("rabbit",),
     "parakeet": ("bird",), "cockatiel": ("bird",),
     "guinea": ("guinea-pig",), "cavy": ("guinea-pig",),
-    "gecko": ("reptile",), "lizard": ("reptile",), "snake": ("reptile",),
+    "gecko": ("reptile",),
     "terrarium": ("reptile", "habitat"), "substrate": ("bedding", "habitat"),
     "aquarium": ("fish", "habitat"), "tank": ("fish", "habitat"),
     "feed": ("food",), "hungry": ("food",), "kibble": ("food",), "hay": ("food",),
@@ -467,11 +467,35 @@ SEARCH_ALIASES = {
 }
 SEARCH_STOPWORDS = {"a", "an", "and", "for", "i", "is", "me", "my", "of", "on",
                     "please", "the", "to", "what", "with"}
+KNOWN_SPECIES_TERMS = {
+    "amphibian", "bird", "cat", "chinchilla", "dog", "ferret", "fish", "gerbil",
+    "guinea-pig", "hamster", "hedgehog", "hermit-crab", "lizard", "mouse", "rabbit",
+    "rat", "reptile", "snake", "turtle",
+}
+PRODUCT_TYPE_TERMS = {
+    "bedding", "bowl", "carrier", "cleaner", "conditioner", "food", "hay",
+    "litter", "substrate", "toy", "toys", "treat", "treats", "wipes",
+}
+PRODUCT_TYPE_TITLE_ALIASES = {
+    "cleaner": {"cleaner", "cleaning"},
+    "toy": {"toy", "toys"},
+    "toys": {"toy", "toys"},
+    "treat": {"treat", "treats"},
+    "treats": {"treat", "treats"},
+}
 
 
 def search_tokens(value: str) -> list[str]:
     return [token for token in re.findall(r"[a-z0-9]+", value.lower())
             if token not in SEARCH_STOPWORDS]
+
+
+def requested_species(tokens: list[str]) -> set[str]:
+    species = {token for token in tokens if token in KNOWN_SPECIES_TERMS}
+    for token in tokens:
+        species.update(alias for alias in SEARCH_ALIASES.get(token, ())
+                       if alias in KNOWN_SPECIES_TERMS)
+    return species
 
 
 def product_search_score(product: Product, query: str) -> int:
@@ -482,6 +506,8 @@ def product_search_score(product: Product, query: str) -> int:
     text = " ".join((product.name, product.brand, product.species, product.category,
                      product.package_size, product.notes)).lower()
     available = set(search_tokens(text))
+    title_tokens = set(search_tokens(product.name))
+    species_signals = requested_species(requested)
     score = 20 if query.strip().lower() in text else 0
     for token in requested:
         if token in available:
@@ -493,6 +519,18 @@ def product_search_score(product: Product, query: str) -> int:
         for alias in SEARCH_ALIASES.get(token, ()):
             if alias in available or alias in {product.species, product.category}:
                 score += 4
+        if (token in PRODUCT_TYPE_TERMS
+                and title_tokens & PRODUCT_TYPE_TITLE_ALIASES.get(token, {token})):
+            score += 12
+        if token in KNOWN_SPECIES_TERMS and token == product.species:
+            score += 10
+    if species_signals:
+        if product.species in species_signals:
+            score += 24
+        elif product.species == "any":
+            score += 4
+        else:
+            score -= 16
     return score
 
 
@@ -522,6 +560,8 @@ def intent_search_score(intent: dict, query: str) -> int:
     text = " ".join((intent["title"], intent["species"], intent["category"],
                      " ".join(intent["keywords"]))).lower()
     available = set(search_tokens(text))
+    title_tokens = set(search_tokens(intent["title"]))
+    species_signals = requested_species(requested)
     score = 20 if query.strip().lower() in text else 0
     if normalized_title and (normalized_title in normalized_query
                              or normalized_query in normalized_title):
@@ -544,6 +584,18 @@ def intent_search_score(intent: dict, query: str) -> int:
         for alias in SEARCH_ALIASES.get(token, ()):
             if alias in available or alias in {intent["species"], intent["category"]}:
                 score += 4
+        if (token in PRODUCT_TYPE_TERMS
+                and title_tokens & PRODUCT_TYPE_TITLE_ALIASES.get(token, {token})):
+            score += 12
+        if token in KNOWN_SPECIES_TERMS and token == intent["species"]:
+            score += 10
+    if species_signals:
+        if intent["species"] in species_signals:
+            score += 24
+        elif intent["species"] == "any":
+            score += 4
+        else:
+            score -= 16
     return score
 
 

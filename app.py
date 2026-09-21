@@ -276,7 +276,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry Connector API", version="0.8.0", lifespan=lifespan,
+    title="Paw Pantry Connector API", version="0.9.0", lifespan=lifespan,
     description="Stateless pet-supply search and refill estimates for Muse. "
                 "The connector cannot read or write Paw Pantry's private pet workspace. "
                 "Retailer actions open only after the user chooses them, and the supplied "
@@ -486,7 +486,7 @@ def product_search_score(product: Product, query: str) -> int:
         elif any(token in word or word in token for word in available):
             score += 2
         for alias in SEARCH_ALIASES.get(token, ()):
-            if alias in available or alias in text:
+            if alias in available or alias in {product.species, product.category}:
                 score += 4
     return score
 
@@ -535,7 +535,7 @@ def intent_search_score(intent: dict, query: str) -> int:
         elif any(token in word or word in token for word in available):
             score += 2
         for alias in SEARCH_ALIASES.get(token, ()):
-            if alias in available or alias in text:
+            if alias in available or alias in {intent["species"], intent["category"]}:
                 score += 4
     return score
 
@@ -921,7 +921,7 @@ def runout(pet_id: int, db: Session = Depends(get_db)):
 def list_products(species: Optional[str] = Query(default=None, max_length=60),
                   category: Optional[str] = Query(default=None, max_length=60),
                   q: Optional[str] = Query(default=None, max_length=200),
-                  limit: int = Query(default=50, ge=1, le=50), db: Session = Depends(get_db)):
+                  limit: int = Query(default=50, ge=1, le=200), db: Session = Depends(get_db)):
     """Search products and return display-ready retailer buttons and disclosures.
 
     Clients may surface each `retailer_options` entry directly. They must show its
@@ -1124,7 +1124,7 @@ def muse_openapi():
     ]
     schema = get_openapi(
         title="Paw Pantry Connector API",
-        version="0.8.0",
+        version="0.9.0",
         description=("Stateless pet-supply search and refill estimates for Muse. "
                      "This contract cannot access Paw Pantry's private pet-profile workspace. "
                      "Inventory matches include a first-party Paw Pantry guidance page and a "

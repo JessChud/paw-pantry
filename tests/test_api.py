@@ -170,7 +170,7 @@ def test_catalog_upsert_preserves_profile_and_supply(api, tmp_path, monkeypatch)
     module.seed()
     module.seed()
     assert client.get('/products').json()[0]['notes'] == 'Updated catalog content'
-    assert len(client.get('/products').json()) == len(rows)
+    assert len(client.get('/products', params={'limit': 200}).json()) == len(rows)
     assert client.get(f'/pets/{pet_id}').status_code == 200
     assert len(client.get(f'/pets/{pet_id}/supplies').json()) == 1
 
@@ -252,15 +252,19 @@ def test_catalog_stats_are_honest_and_public(api):
     client, _ = api
     client.headers.pop('X-API-Key')
     stats = client.get('/catalog-stats').json()
-    assert stats['active_curated_products'] == 25
+    assert stats['active_curated_products'] == 125
     assert stats['retired_products'] == 5
     assert stats['shopping_intents'] == 2771
-    assert stats['verified_amazon_products'] == 23
-    assert stats['affiliate_enabled_active_products'] == 25
+    assert stats['verified_amazon_products'] == 123
+    assert stats['affiliate_enabled_active_products'] == 125
     assert stats['affiliate_enabled_intents'] == 2771
     assert stats['verified_chewy_products'] == 0
-    assert stats['species_counts']['dog'] == 12
-    assert stats['species_counts']['cat'] == 8
+    assert stats['species_counts']['dog'] == 42
+    assert stats['species_counts']['cat'] == 33
+    assert stats['species_counts']['fish'] == 11
+    assert stats['species_counts']['bird'] == 8
+    assert stats['category_counts']['food'] == 28
+    assert stats['category_counts']['toys'] == 15
     assert stats['shopping_species_counts']['dog'] == 473
     assert stats['shopping_species_counts']['guinea-pig'] == 66
     assert stats['shopping_species_counts']['ferret'] == 159
@@ -304,10 +308,10 @@ def test_inventory_is_product_type_coverage_not_fake_retail_stock(api):
 
 def test_every_active_product_and_inventory_concept_has_affiliate_path(api):
     client, _ = api
-    products = client.get('/products', params={'limit': 50}).json()
-    assert len(products) == 25
+    products = client.get('/products', params={'limit': 200}).json()
+    assert len(products) == 125
     assert all(product['amazon_link_available'] for product in products)
-    assert sum(product['verified_amazon_product_link'] for product in products) == 23
+    assert sum(product['verified_amazon_product_link'] for product in products) == 123
     assert sum(product['affiliate_search_available'] for product in products) == 2
     assert all(any(option['retailer'] == 'amazon' and option['affiliate']
                    for option in product['retailer_options']) for product in products)

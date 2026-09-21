@@ -6,7 +6,7 @@ Private single-owner pet profiles, supply estimates, and a public pet-supply cat
 
 Use Python 3.14 (Render runtime; tests also run on 3.12). Install `requirements.txt`, set `PAW_PANTRY_API_KEY` and `MUSE_CONNECTOR_API_KEY` to different private random values, and run `uvicorn app:app`. Without `DATABASE_URL`, local development uses SQLite. Production must set `DATABASE_URL` to the Neon TLS connection URL. Never commit or share these secrets.
 
-Public pages: `/`, `/catalog`, `/guide`, `/guides/{slug}`, `/calculator`, `/about`, `/privacy`, `/terms`, `/documentation`, `/docs`, `/openapi.json`. `/health` checks database connectivity, `/ready` confirms the connector credential and database are configured, and `/ping` returns an uncached 204 for process liveness without touching the database. API requests use the `X-API-Key` header. Missing or incorrect credentials return 401.
+Public pages: `/`, `/catalog`, `/recommendations`, `/shop/{intent_id}`, `/guide`, `/guides/{slug}`, `/calculator`, `/about`, `/privacy`, `/terms`, `/documentation`, `/docs`, `/openapi.json`. `/health` checks database connectivity, `/ready` confirms the connector credential and database are configured, and `/ping` returns an uncached 204 for process liveness without touching the database. API requests use the `X-API-Key` header. Missing or incorrect credentials return 401.
 
 ## Current connector scope
 
@@ -17,9 +17,12 @@ Supported examples:
 - Search the starter catalog by species, category, or keyword. Each result includes
   validated `retailer_options` that Muse can render as direct external buttons with
   the supplied affiliate disclosure.
-- Match requests against 174 product-type coverage records spanning eight pet types
-  plus general supplies. These records improve request understanding but are not
+- Match requests against 2,771 product-type and shopping-constraint records spanning
+  20 pet types. These records improve request understanding but are not
   represented as live retailer inventory, tested products, or suitability guarantees.
+- Give every active curated product and every shopping-intent record a tagged Amazon
+  path. The 23 checked ASIN links remain identified as verified product links; the
+  other paths are labeled as changing Amazon searches, never exact products.
 - Handle open-ended requests through `/shopping-options`. It returns ranked curated
   matches plus a tagged Amazon search-results action for broader choice. The search
   action is clearly identified as changing retailer results rather than a verified
@@ -29,8 +32,10 @@ Supported examples:
 
 There are no scheduled reminders, automatic orders, checkout, delivery tracking, live prices, veterinary recommendations, or automatic ingredient/allergy filtering. An allergy recorded in a profile does not certify any product as suitable. Reorder dates are estimates, including past dates for overdue supplies. Check actual supplies and the current label.
 
-The checked local catalog is deliberately smaller than Amazon's catalog. Paw Pantry
-uses a broad Amazon pet-supply search action for long-tail shopping requests. The
+The checked local product catalog is deliberately smaller than Amazon's catalog. Paw Pantry
+uses relevant Amazon pet-supply search actions for long-tail shopping requests. Every
+shopping-intent record also has a public `/shop/{intent_id}` source page with original
+selection guidance and a deliberate affiliate click. The
 Amazon Associates Link Checker validated a representative generated search URL as
 tagging to this account. The
 intended next phase is Amazon's Creators API `SearchItems` operation, which can return
@@ -47,10 +52,11 @@ The public site also offers ten original AI-assisted planning guides and a brows
 `/catalog-stats` reports the current inventory without authentication. The curated
 seed has 30 stable records: 25 active products, five retained retired variants,
 23 active verified Amazon product links, and no active Chewy links. The curated set
-covers seven species and 14 supply categories. A separate 174-record shopping-intent
-library covers eight pet types plus general supplies across 23 categories. `/inventory`
-searches that coverage library, while `/shopping-options` combines it with curated
-products and a broader tagged Amazon search.
+covers seven species and 14 supply categories. A separate 2,771-record shopping-intent
+library covers 20 pet types across 23 categories. `/inventory` searches that coverage
+library, while `/shopping-options` combines it with curated products and tagged Amazon
+searches. `/recommendations` makes the full library browsable on Paw Pantry, and each
+`/shop/{intent_id}` page supplies relevant original guidance before the retailer action.
 
 When `OPENAI_API_KEY` is set, product and shopping-intent search uses
 `text-embedding-3-small` with 256-dimensional embeddings to combine semantic relevance
@@ -65,11 +71,13 @@ Optional settings are
 
 `data/seed_products.json` contains stable product IDs. Startup updates those managed IDs and inserts new ones in a transaction; it preserves pets, supplies, and other product rows. Never recycle an ID for a different product. Schema changes need a separate migration plan; startup table creation does not migrate existing columns.
 
-`data/catalog_sources.json` records checked manufacturer pages, Amazon ASINs, checked variants, and link provenance. Five older package/variant records are retired from browsing and search but retained in the database for existing supplies; their alternatives have new IDs. 23 Amazon purchase links are currently configured. Two current entries still lack verified Amazon matches, and Chewy approval is pending. Missing links return 409 rather than a placeholder. Use only verified product ASINs with Amazon’s documented simple text link format; do not guess product IDs or advertise approval that has not been received.
+`data/catalog_sources.json` records checked manufacturer pages, Amazon ASINs, checked variants, and link provenance. Five older package/variant records are retired from browsing and search but retained in the database for existing supplies; their alternatives have new IDs. 23 Amazon product links are currently configured. Two active entries lack verified ASIN links and therefore use clearly labeled tagged Amazon searches instead of guessed product URLs. Chewy approval is pending. Use only verified product ASINs with Amazon’s documented simple text link format; do not guess product IDs or advertise approval that has not been received.
+
+`data/shopping_intent_seeds.json` is the reviewed core coverage set. `scripts/build_shopping_inventory.py` adds constraint variants and additional companion-animal concepts, then deterministically writes `data/shopping_intents.json`. Run the builder and review its count before committing inventory changes. Variants expand query coverage; they do not become claims of live stock, product testing, price, ratings, or suitability.
 
 ## Affiliate link maintenance
 
-Run `python scripts/check_affiliate_links.py` before publishing. It checks Amazon links against their recorded ASIN and the required `pawpantry-20` tag, and Chewy links against approval and dated verification records without opening affiliate URLs or generating clicks. Verify the current product page and variant separately when adding an ASIN. Amazon’s Link Checker confirmed a sample of the documented format tags to this account. SiteStripe copying is not required. The API also rejects Amazon links with an incorrect tag. Product search responses expose only validated links in `retailer_options`; each option includes `button_label`, `url`, `disclosure`, `affiliate`, `opens_after_user_click`, and `rel` so Muse can display it without a second API call. Muse must show the supplied disclosure beside the action and must never open a retailer or initiate a purchase without the user's click.
+Run `python scripts/build_shopping_inventory.py` and `python scripts/check_affiliate_links.py` before publishing. The checker validates exact Amazon links against their recorded ASIN and the required `pawpantry-20` tag, verifies that every active catalog record and shopping intent has an affiliate path, and checks Chewy links against approval and dated verification records without opening affiliate URLs or generating clicks. Verify the current product page and variant separately when adding an ASIN. Amazon’s Link Checker confirmed a sample of the documented format tags to this account. SiteStripe copying is not required. The API never publishes an Amazon product URL with an incorrect tag; it substitutes a clearly labeled tagged search action instead. Product search responses expose only validated links in `retailer_options`; each option includes `button_label`, `url`, `disclosure`, `affiliate`, `opens_after_user_click`, and `rel` so Muse can display it without a second API call. Muse must show the supplied disclosure beside the action and must never open a retailer or initiate a purchase without the user's click.
 
 ## Tests and deployment
 

@@ -181,7 +181,11 @@ def test_link_validation_and_disclosure(api):
     assert client.get('/products/1/link?retailer=chewy').status_code == 409
     with module.SessionLocal.begin() as db:
         db.get(module.Product, 1).amazon_url = 'https://evil.example/redirect'
-    assert client.get('/products/1/link').status_code == 409
+    fallback = client.get('/products/1/link')
+    assert fallback.status_code == 200
+    assert fallback.json()['kind'] == 'search'
+    assert 'tag=pawpantry-20' in fallback.json()['url']
+    assert 'evil.example' not in fallback.json()['url']
     with module.SessionLocal.begin() as db:
         db.get(module.Product, 1).amazon_url = 'https://www.amazon.com/dp/B09K8YYVWV?tag=pawpantry-20'
     response = client.get('/products/1/link').json()
@@ -206,6 +210,7 @@ def test_product_search_returns_display_ready_amazon_option(api):
     assert amazon['affiliate'] is True
     assert amazon['opens_after_user_click'] is True
     assert amazon['rel'] == 'sponsored nofollow noopener'
+    assert amazon['source_page_url'].endswith('/catalog#product-1')
     assert 'As an Amazon Associate I earn from qualifying purchases.' in amazon['disclosure']
 
     schema = client.get('/openapi.json').json()
@@ -249,15 +254,19 @@ def test_catalog_stats_are_honest_and_public(api):
     stats = client.get('/catalog-stats').json()
     assert stats['active_curated_products'] == 25
     assert stats['retired_products'] == 5
-    assert stats['shopping_intents'] == 174
+    assert stats['shopping_intents'] == 2771
     assert stats['verified_amazon_products'] == 23
+    assert stats['affiliate_enabled_active_products'] == 25
+    assert stats['affiliate_enabled_intents'] == 2771
     assert stats['verified_chewy_products'] == 0
     assert stats['species_counts']['dog'] == 12
     assert stats['species_counts']['cat'] == 8
-    assert stats['shopping_species_counts']['dog'] == 61
-    assert stats['shopping_species_counts']['guinea-pig'] == 8
-    assert stats['shopping_category_counts']['food'] == 30
+    assert stats['shopping_species_counts']['dog'] == 473
+    assert stats['shopping_species_counts']['guinea-pig'] == 66
+    assert stats['shopping_species_counts']['ferret'] == 159
+    assert stats['shopping_category_counts']['food'] == 384
     assert stats['broader_amazon_search_enabled'] is True
+    assert stats['first_party_recommendation_pages'] == 2771
     assert stats['semantic_search_enabled'] is False
     assert stats['semantic_model'] is None
 
@@ -269,6 +278,7 @@ def test_catalog_stats_are_honest_and_public(api):
     ('exercise wheel for my hamster', 'Hamster exercise wheel'),
     ('hay for my guinea pig', 'Guinea pig hay'),
     ('hands free leash for running', 'Hands-free running leash'),
+    ('soft sided ferret carrier', 'Ferret carrier — soft-sided option'),
 ])
 def test_expanded_inventory_matches_common_requests(api, query, expected):
     client, _ = api
@@ -286,6 +296,41 @@ def test_inventory_is_product_type_coverage_not_fake_retail_stock(api):
     assert all(row['species'] in {'reptile', 'any'} for row in result)
     assert all(row['category'] == 'habitat' for row in result)
     assert all('url' not in row and 'price' not in row for row in result)
+    assert all(row['website_url'].startswith('https://paw-pantry.onrender.com/shop/')
+               for row in result)
+    assert all(row['retailer_options'][0]['kind'] == 'search' for row in result)
+    assert all('tag=pawpantry-20' in row['retailer_options'][0]['url'] for row in result)
+
+
+def test_every_active_product_and_inventory_concept_has_affiliate_path(api):
+    client, _ = api
+    products = client.get('/products', params={'limit': 50}).json()
+    assert len(products) == 25
+    assert all(product['amazon_link_available'] for product in products)
+    assert sum(product['verified_amazon_product_link'] for product in products) == 23
+    assert sum(product['affiliate_search_available'] for product in products) == 2
+    assert all(any(option['retailer'] == 'amazon' and option['affiliate']
+                   for option in product['retailer_options']) for product in products)
+
+    inventory = client.get('/inventory', params={'limit': 100}).json()
+    assert len(inventory) == 100
+    assert all(row['retailer_options'][0]['affiliate'] for row in inventory)
+    assert all(row['retailer_options'][0]['opens_after_user_click'] for row in inventory)
+
+
+def test_recommendation_library_and_first_party_source_page(api):
+    client, _ = api
+    client.headers.pop('X-API-Key')
+    library = client.get('/recommendations', params={'q': 'ferret hammock'})
+    assert library.status_code == 200
+    assert '2,771 product-type' in library.text
+    assert '/shop/ferret-ferret-hammock' in library.text
+    page = client.get('/shop/ferret-ferret-hammock')
+    assert page.status_code == 200
+    assert 'Ferret hammock' in page.text
+    assert 'tag=pawpantry-20' in page.text
+    assert 'As an Amazon Associate I earn from qualifying purchases.' in page.text
+    assert client.get('/shop/not-a-real-intent').status_code == 404
 
 
 def test_semantic_ranking_can_retrieve_without_keyword_overlap(api, monkeypatch):
@@ -343,10 +388,15 @@ def test_wrong_tracking_tag_is_not_published(api):
     client, module = api
     with module.SessionLocal.begin() as db:
         db.get(module.Product, 1).amazon_url = 'https://www.amazon.com/dp/B09K8YYVWV?tag=wrong-owner-20'
-    assert client.get('/products/1/link').status_code == 409
+    fallback = client.get('/products/1/link').json()
+    assert fallback['kind'] == 'search'
+    assert 'tag=pawpantry-20' in fallback['url']
     product = next(row for row in client.get('/products').json() if row['id'] == 1)
-    assert product['amazon_link_available'] is False
-    assert all(option['retailer'] != 'amazon' for option in product['retailer_options'])
+    assert product['amazon_link_available'] is True
+    assert product['verified_amazon_product_link'] is False
+    assert product['affiliate_search_available'] is True
+    assert any(option['retailer'] == 'amazon' and option['kind'] == 'search'
+               for option in product['retailer_options'])
     assert 'wrong-owner-20' not in client.get('/catalog').text
 
 

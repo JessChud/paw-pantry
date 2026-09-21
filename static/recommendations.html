@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pet-supply recommendation library — Paw Pantry</title>
+<meta name="description" content="Search Paw Pantry's broad pet-supply recommendation library by animal, category, and need.">
+<style>body{margin:0;background:#fffbeb;color:#1f2937;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}.wrap{max-width:1100px;margin:auto;padding:32px 24px 64px}a{color:#075985}h1{font-size:2.1rem;line-height:1.2}.intro{max-width:800px}.disclosure{background:#fff7d6;border:1px solid #d6b950;padding:16px;border-radius:12px;margin:24px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}article{background:#fff;border:1px solid #e7dcc0;border-radius:16px;padding:20px}article h2{font-size:1.05rem;line-height:1.35}.tag{font-size:.82rem;color:#52525b}form{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:24px 0}label{display:block;font-size:.9rem}input,select,button{font:inherit;max-width:100%;padding:10px;border:1px solid #9ca3af;border-radius:8px}button{background:#1f2937;color:white;cursor:pointer}footer{margin-top:38px}</style>
+</head><body><main class="wrap">
+<p><a href="/">← Paw Pantry</a></p>
+<h1>Pet-supply recommendation library</h1>
+<p class="intro">Search {{TOTAL}} product-type and shopping-constraint records. These entries help match a request to a useful shopping category. They are not live stock, hands-on reviews, medical recommendations, or guarantees that an item is suitable for a particular animal.</p>
+<div class="disclosure"><strong>Affiliate disclosure:</strong> As an Amazon Associate I earn from qualifying purchases. Each recommendation page offers a clearly labeled Amazon affiliate search link. Search results, sellers, prices, and availability can change. Paw Pantry does not place orders or process payments.</div>
+<form action="/recommendations" method="get"><div><label for="q">What are you looking for?</label><input id="q" name="q" maxlength="200" value="{{QUERY}}" placeholder="Travel carrier, washable bed…"></div><div><label for="species">Pet</label><select id="species" name="species">{{SPECIES}}</select></div><div><label for="category">Category</label><select id="category" name="category">{{CATEGORIES}}</select></div><button type="submit">Find product types</button><a href="/recommendations">Clear filters</a></form>
+<p>Showing {{COUNT}} matches</p><div class="grid">{{RESULTS}}</div>
+<footer><a href="/catalog">Curated products</a> · <a href="/guide">Shopping guides</a> · <a href="/about">About &amp; editorial policy</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="mailto:hellopawpantry@gmail.com">Contact</a></footer>
+</main></body></html>

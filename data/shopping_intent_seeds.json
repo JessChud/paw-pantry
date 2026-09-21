@@ -1,0 +1,2428 @@
+[
+  {
+    "id": "dog-puppy-dry-food",
+    "title": "Puppy dry food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "puppy",
+      "kibble",
+      "dry",
+      "food",
+      "growth",
+      "small",
+      "large",
+      "breed"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-adult-dry-dog-food",
+    "title": "Adult dry dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "adult",
+      "kibble",
+      "everyday",
+      "dry",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-senior-dog-food",
+    "title": "Senior dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "senior",
+      "older",
+      "dog",
+      "aging",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-wet-dog-food",
+    "title": "Wet dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "canned",
+      "wet",
+      "dog",
+      "food",
+      "topper"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-sensitive-stomach-dog-food",
+    "title": "Sensitive-stomach dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "sensitive",
+      "stomach",
+      "digestion",
+      "gentle",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-limited-ingredient-dog-food",
+    "title": "Limited-ingredient dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "limited",
+      "ingredient",
+      "allergy",
+      "elimination",
+      "diet",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-weight-management-dog-food",
+    "title": "Weight-management dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "diet",
+      "weight",
+      "management",
+      "low",
+      "calorie",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-small-breed-dog-food",
+    "title": "Small-breed dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "small",
+      "breed",
+      "toy",
+      "breed",
+      "kibble",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-large-breed-dog-food",
+    "title": "Large-breed dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "large",
+      "breed",
+      "big",
+      "dog",
+      "kibble",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-fish-recipe-dog-food",
+    "title": "Fish-recipe dog food",
+    "species": "dog",
+    "category": "food",
+    "keywords": [
+      "salmon",
+      "fish",
+      "recipe",
+      "no",
+      "chicken",
+      "dog",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-training-treats",
+    "title": "Training treats",
+    "species": "dog",
+    "category": "treats",
+    "keywords": [
+      "training",
+      "reward",
+      "small",
+      "bite",
+      "puppy",
+      "treats"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-dental-chews",
+    "title": "Dental chews",
+    "species": "dog",
+    "category": "treats",
+    "keywords": [
+      "dental",
+      "chew",
+      "oral",
+      "care",
+      "teeth",
+      "treats"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-freeze-dried-dog-treats",
+    "title": "Freeze-dried dog treats",
+    "species": "dog",
+    "category": "treats",
+    "keywords": [
+      "freeze",
+      "dried",
+      "single",
+      "ingredient",
+      "treats"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-soft-senior-dog-treats",
+    "title": "Soft senior-dog treats",
+    "species": "dog",
+    "category": "treats",
+    "keywords": [
+      "soft",
+      "chewy",
+      "senior",
+      "old",
+      "dog",
+      "treats"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-low-calorie-dog-treats",
+    "title": "Low-calorie dog treats",
+    "species": "dog",
+    "category": "treats",
+    "keywords": [
+      "low",
+      "calorie",
+      "weight",
+      "management",
+      "treats"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "dog-durable-chew-toy",
+    "title": "Durable chew toy",
+    "species": "dog",
+    "category": "toys",
+    "keywords": [
+      "durable",
+      "indestructible",
+      "power",
+      "chewer",
+      "chew",
+      "toy"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "dog-puppy-teething-toy",
+    "title": "Puppy teething toy",
+    "species": "dog",
+    "category": "toys",
+    "keywords": [
+      "puppy",
+      "biting",
+      "teething",
+      "redirect",
+      "chew",
+      "toy"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "dog-puzzle-enrichment-toy",
+    "title": "Puzzle enrichment toy",
+    "species": "dog",
+    "category": "toys",
+    "keywords": [
+      "puzzle",
+      "enrichment",
+      "busy",
+      "mental",
+      "stimulation",
+      "toy"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "dog-fetch-toy",
+    "title": "Fetch toy",
+    "species": "dog",
+    "category": "toys",
+    "keywords": [
+      "fetch",
+      "ball",
+      "retriever",
+      "lab",
+      "outdoor",
+      "toy"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "dog-tug-toy",
+    "title": "Tug toy",
+    "species": "dog",
+    "category": "toys",
+    "keywords": [
+      "tug",
+      "rope",
+      "strong",
+      "dog",
+      "interactive",
+      "toy"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "dog-squeaky-dog-toy",
+    "title": "Squeaky dog toy",
+    "species": "dog",
+    "category": "toys",
+    "keywords": [
+      "squeaky",
+      "plush",
+      "puppy",
+      "toy"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "dog-orthopedic-dog-bed",
+    "title": "Orthopedic dog bed",
+    "species": "dog",
+    "category": "beds",
+    "keywords": [
+      "orthopedic",
+      "senior",
+      "joint",
+      "support",
+      "dog",
+      "bed"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-washable-dog-bed",
+    "title": "Washable dog bed",
+    "species": "dog",
+    "category": "beds",
+    "keywords": [
+      "washable",
+      "removable",
+      "cover",
+      "dog",
+      "bed"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-calming-dog-bed",
+    "title": "Calming dog bed",
+    "species": "dog",
+    "category": "beds",
+    "keywords": [
+      "calming",
+      "anxious",
+      "donut",
+      "dog",
+      "bed"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-cooling-mat",
+    "title": "Cooling mat",
+    "species": "dog",
+    "category": "beds",
+    "keywords": [
+      "cooling",
+      "mat",
+      "summer",
+      "hot",
+      "weather",
+      "dog"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-standard-dog-leash",
+    "title": "Standard dog leash",
+    "species": "dog",
+    "category": "leashes",
+    "keywords": [
+      "walking",
+      "leash",
+      "standard",
+      "dog"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-retractable-leash",
+    "title": "Retractable leash",
+    "species": "dog",
+    "category": "leashes",
+    "keywords": [
+      "retractable",
+      "extendable",
+      "dog",
+      "leash"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-hands-free-running-leash",
+    "title": "Hands-free running leash",
+    "species": "dog",
+    "category": "leashes",
+    "keywords": [
+      "hands",
+      "free",
+      "running",
+      "jogging",
+      "waist",
+      "leash"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-no-pull-harness",
+    "title": "No-pull harness",
+    "species": "dog",
+    "category": "leashes",
+    "keywords": [
+      "harness",
+      "pulls",
+      "no",
+      "pull",
+      "front",
+      "clip",
+      "puppy"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-martingale-collar",
+    "title": "Martingale collar",
+    "species": "dog",
+    "category": "leashes",
+    "keywords": [
+      "martingale",
+      "greyhound",
+      "collar",
+      "limited",
+      "slip"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-dog-id-collar",
+    "title": "Dog ID collar",
+    "species": "dog",
+    "category": "leashes",
+    "keywords": [
+      "collar",
+      "identification",
+      "everyday",
+      "dog"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-poop-bags",
+    "title": "Poop bags",
+    "species": "dog",
+    "category": "waste",
+    "keywords": [
+      "poop",
+      "waste",
+      "bags",
+      "refill",
+      "rolls",
+      "dog"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-poop-bag-holder",
+    "title": "Poop-bag holder",
+    "species": "dog",
+    "category": "waste",
+    "keywords": [
+      "poop",
+      "bag",
+      "dispenser",
+      "holder",
+      "leash"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-puppy-pee-pads",
+    "title": "Puppy pee pads",
+    "species": "dog",
+    "category": "house-training",
+    "keywords": [
+      "pee",
+      "pads",
+      "house",
+      "training",
+      "new",
+      "puppy"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-training-clicker",
+    "title": "Training clicker",
+    "species": "dog",
+    "category": "training",
+    "keywords": [
+      "clicker",
+      "marker",
+      "puppy",
+      "dog",
+      "training"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-baby-gate",
+    "title": "Baby gate",
+    "species": "dog",
+    "category": "house-training",
+    "keywords": [
+      "baby",
+      "gate",
+      "stairs",
+      "dog",
+      "puppy",
+      "boundary"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-crate-training-crate",
+    "title": "Crate-training crate",
+    "species": "dog",
+    "category": "carriers",
+    "keywords": [
+      "crate",
+      "kennel",
+      "training",
+      "puppy",
+      "home"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-dog-shampoo",
+    "title": "Dog shampoo",
+    "species": "dog",
+    "category": "grooming",
+    "keywords": [
+      "bath",
+      "shampoo",
+      "coat",
+      "dog",
+      "puppy"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-dog-nail-clippers",
+    "title": "Dog nail clippers",
+    "species": "dog",
+    "category": "grooming",
+    "keywords": [
+      "nail",
+      "clippers",
+      "grinder",
+      "dog",
+      "puppy"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-dog-ear-cleaner",
+    "title": "Dog ear cleaner",
+    "species": "dog",
+    "category": "grooming",
+    "keywords": [
+      "ear",
+      "cleaner",
+      "dog",
+      "grooming"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-dog-toothbrush-kit",
+    "title": "Dog toothbrush kit",
+    "species": "dog",
+    "category": "grooming",
+    "keywords": [
+      "toothbrush",
+      "toothpaste",
+      "dental",
+      "oral",
+      "dog"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-dog-brush",
+    "title": "Dog brush",
+    "species": "dog",
+    "category": "grooming",
+    "keywords": [
+      "brush",
+      "long",
+      "hair",
+      "golden",
+      "retriever",
+      "coat"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-de-shedding-tool",
+    "title": "De-shedding tool",
+    "species": "dog",
+    "category": "grooming",
+    "keywords": [
+      "deshedding",
+      "husky",
+      "undercoat",
+      "shedding",
+      "rake"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-paw-balm",
+    "title": "Paw balm",
+    "species": "dog",
+    "category": "grooming",
+    "keywords": [
+      "paw",
+      "balm",
+      "winter",
+      "walks",
+      "dry",
+      "paws"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-grooming-wipes",
+    "title": "Grooming wipes",
+    "species": "dog",
+    "category": "grooming",
+    "keywords": [
+      "wipes",
+      "quick",
+      "clean",
+      "dog",
+      "grooming"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-travel-dog-crate",
+    "title": "Travel dog crate",
+    "species": "dog",
+    "category": "travel",
+    "keywords": [
+      "travel",
+      "crate",
+      "carrier",
+      "dog",
+      "car",
+      "airline"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-dog-car-harness",
+    "title": "Dog car harness",
+    "species": "dog",
+    "category": "travel",
+    "keywords": [
+      "car",
+      "safety",
+      "harness",
+      "seat",
+      "belt",
+      "dog"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-car-seat-cover",
+    "title": "Car seat cover",
+    "species": "dog",
+    "category": "travel",
+    "keywords": [
+      "car",
+      "seat",
+      "couch",
+      "cover",
+      "dog",
+      "waterproof"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-collapsible-travel-bowl",
+    "title": "Collapsible travel bowl",
+    "species": "dog",
+    "category": "travel",
+    "keywords": [
+      "collapsible",
+      "travel",
+      "water",
+      "food",
+      "bowl",
+      "dog"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-non-spill-car-bowl",
+    "title": "Non-spill car bowl",
+    "species": "dog",
+    "category": "travel",
+    "keywords": [
+      "non",
+      "spill",
+      "water",
+      "bowl",
+      "car",
+      "travel",
+      "dog"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "dog-slow-feeder-bowl",
+    "title": "Slow-feeder bowl",
+    "species": "dog",
+    "category": "feeding",
+    "keywords": [
+      "slow",
+      "feeder",
+      "fast",
+      "eater",
+      "dog",
+      "bowl"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-raised-dog-bowls",
+    "title": "Raised dog bowls",
+    "species": "dog",
+    "category": "feeding",
+    "keywords": [
+      "raised",
+      "elevated",
+      "bowl",
+      "tall",
+      "large",
+      "dog"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-dog-food-storage-bin",
+    "title": "Dog food storage bin",
+    "species": "dog",
+    "category": "feeding",
+    "keywords": [
+      "airtight",
+      "food",
+      "storage",
+      "kibble",
+      "container"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-enzyme-stain-cleaner",
+    "title": "Enzyme stain cleaner",
+    "species": "dog",
+    "category": "cleaning",
+    "keywords": [
+      "enzyme",
+      "pet",
+      "stain",
+      "urine",
+      "carpet",
+      "cleaner"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-pet-hair-lint-roller",
+    "title": "Pet-hair lint roller",
+    "species": "dog",
+    "category": "cleaning",
+    "keywords": [
+      "lint",
+      "roller",
+      "pet",
+      "hair",
+      "furniture",
+      "clothes"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-durable-couch-cover",
+    "title": "Durable couch cover",
+    "species": "dog",
+    "category": "cleaning",
+    "keywords": [
+      "couch",
+      "sofa",
+      "cover",
+      "survives",
+      "dog",
+      "washable"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "dog-flea-comb",
+    "title": "Flea comb",
+    "species": "dog",
+    "category": "flea-tick",
+    "keywords": [
+      "manual",
+      "flea",
+      "comb",
+      "grooming",
+      "dog"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "dog-flea-and-tick-prevention",
+    "title": "Flea-and-tick prevention",
+    "species": "dog",
+    "category": "flea-tick",
+    "keywords": [
+      "flea",
+      "tick",
+      "prevention",
+      "treatment",
+      "dog"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "dog-joint-support-supplement",
+    "title": "Joint-support supplement",
+    "species": "dog",
+    "category": "supplements",
+    "keywords": [
+      "joint",
+      "supplement",
+      "senior",
+      "dog",
+      "mobility"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "dog-digestive-probiotic",
+    "title": "Digestive probiotic",
+    "species": "dog",
+    "category": "supplements",
+    "keywords": [
+      "probiotic",
+      "digestion",
+      "stomach",
+      "dog"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "dog-calming-chew",
+    "title": "Calming chew",
+    "species": "dog",
+    "category": "supplements",
+    "keywords": [
+      "calming",
+      "chews",
+      "anxiety",
+      "storm",
+      "nervous",
+      "dog"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "cat-kitten-dry-food",
+    "title": "Kitten dry food",
+    "species": "cat",
+    "category": "food",
+    "keywords": [
+      "kitten",
+      "growth",
+      "dry",
+      "kibble",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-adult-dry-cat-food",
+    "title": "Adult dry cat food",
+    "species": "cat",
+    "category": "food",
+    "keywords": [
+      "adult",
+      "dry",
+      "kibble",
+      "cat",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-senior-cat-food",
+    "title": "Senior cat food",
+    "species": "cat",
+    "category": "food",
+    "keywords": [
+      "senior",
+      "older",
+      "aging",
+      "cat",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-wet-cat-food",
+    "title": "Wet cat food",
+    "species": "cat",
+    "category": "food",
+    "keywords": [
+      "wet",
+      "canned",
+      "pate",
+      "cat",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-sensitive-stomach-cat-food",
+    "title": "Sensitive-stomach cat food",
+    "species": "cat",
+    "category": "food",
+    "keywords": [
+      "sensitive",
+      "stomach",
+      "digestion",
+      "cat",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-limited-ingredient-cat-food",
+    "title": "Limited-ingredient cat food",
+    "species": "cat",
+    "category": "food",
+    "keywords": [
+      "limited",
+      "ingredient",
+      "allergy",
+      "cat",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-weight-management-cat-food",
+    "title": "Weight-management cat food",
+    "species": "cat",
+    "category": "food",
+    "keywords": [
+      "weight",
+      "management",
+      "low",
+      "calorie",
+      "overweight",
+      "cat",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-fish-recipe-cat-food",
+    "title": "Fish-recipe cat food",
+    "species": "cat",
+    "category": "food",
+    "keywords": [
+      "salmon",
+      "fish",
+      "recipe",
+      "cat",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-crunchy-cat-treats",
+    "title": "Crunchy cat treats",
+    "species": "cat",
+    "category": "treats",
+    "keywords": [
+      "crunchy",
+      "cat",
+      "treats",
+      "snack"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-lickable-cat-treats",
+    "title": "Lickable cat treats",
+    "species": "cat",
+    "category": "treats",
+    "keywords": [
+      "lickable",
+      "puree",
+      "tube",
+      "cat",
+      "treats"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-freeze-dried-cat-treats",
+    "title": "Freeze-dried cat treats",
+    "species": "cat",
+    "category": "treats",
+    "keywords": [
+      "freeze",
+      "dried",
+      "single",
+      "ingredient",
+      "cat",
+      "treats"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-low-calorie-cat-treats",
+    "title": "Low-calorie cat treats",
+    "species": "cat",
+    "category": "treats",
+    "keywords": [
+      "low",
+      "calorie",
+      "overweight",
+      "cat",
+      "treats"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "cat-clumping-cat-litter",
+    "title": "Clumping cat litter",
+    "species": "cat",
+    "category": "litter",
+    "keywords": [
+      "clumping",
+      "cat",
+      "litter",
+      "scoopable"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-dust-free-cat-litter",
+    "title": "Dust-free cat litter",
+    "species": "cat",
+    "category": "litter",
+    "keywords": [
+      "dust",
+      "free",
+      "low",
+      "dust",
+      "cat",
+      "litter"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-odor-control-litter",
+    "title": "Odor-control litter",
+    "species": "cat",
+    "category": "litter",
+    "keywords": [
+      "odor",
+      "control",
+      "scented",
+      "unscented",
+      "cat",
+      "litter"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-cat-litter-box",
+    "title": "Cat litter box",
+    "species": "cat",
+    "category": "litter",
+    "keywords": [
+      "litter",
+      "box",
+      "tray",
+      "cat"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-self-cleaning-litter-box",
+    "title": "Self-cleaning litter box",
+    "species": "cat",
+    "category": "litter",
+    "keywords": [
+      "automatic",
+      "self",
+      "cleaning",
+      "litter",
+      "box"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-litter-mat",
+    "title": "Litter mat",
+    "species": "cat",
+    "category": "litter",
+    "keywords": [
+      "litter",
+      "tracking",
+      "mess",
+      "mat"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-litter-area-odor-eliminator",
+    "title": "Litter-area odor eliminator",
+    "species": "cat",
+    "category": "cleaning",
+    "keywords": [
+      "odor",
+      "eliminator",
+      "litter",
+      "area",
+      "deodorizer"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-teaser-wand",
+    "title": "Teaser wand",
+    "species": "cat",
+    "category": "toys",
+    "keywords": [
+      "teaser",
+      "wand",
+      "feather",
+      "kitten",
+      "cat",
+      "toy"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "cat-catnip-toy",
+    "title": "Catnip toy",
+    "species": "cat",
+    "category": "toys",
+    "keywords": [
+      "catnip",
+      "toy",
+      "mouse",
+      "cat"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "cat-cardboard-scratcher",
+    "title": "Cardboard scratcher",
+    "species": "cat",
+    "category": "toys",
+    "keywords": [
+      "cardboard",
+      "scratcher",
+      "scratching",
+      "cat"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "cat-scratching-post",
+    "title": "Scratching post",
+    "species": "cat",
+    "category": "toys",
+    "keywords": [
+      "scratching",
+      "post",
+      "couch",
+      "redirect",
+      "cat",
+      "kitten"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "cat-cat-tree",
+    "title": "Cat tree",
+    "species": "cat",
+    "category": "furniture",
+    "keywords": [
+      "cat",
+      "tree",
+      "small",
+      "apartment",
+      "tower"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "cat-window-perch",
+    "title": "Window perch",
+    "species": "cat",
+    "category": "furniture",
+    "keywords": [
+      "window",
+      "perch",
+      "hammock",
+      "cat"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "cat-cat-bed",
+    "title": "Cat bed",
+    "species": "cat",
+    "category": "beds",
+    "keywords": [
+      "cat",
+      "bed",
+      "cozy",
+      "washable"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-heated-cat-bed",
+    "title": "Heated cat bed",
+    "species": "cat",
+    "category": "beds",
+    "keywords": [
+      "heated",
+      "warming",
+      "old",
+      "senior",
+      "cat",
+      "bed"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-cat-brush",
+    "title": "Cat brush",
+    "species": "cat",
+    "category": "grooming",
+    "keywords": [
+      "brush",
+      "long",
+      "hair",
+      "cat",
+      "grooming"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-cat-nail-clippers",
+    "title": "Cat nail clippers",
+    "species": "cat",
+    "category": "grooming",
+    "keywords": [
+      "nail",
+      "clippers",
+      "cat",
+      "kitten"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-cat-dental-kit",
+    "title": "Cat dental kit",
+    "species": "cat",
+    "category": "grooming",
+    "keywords": [
+      "toothbrush",
+      "toothpaste",
+      "oral",
+      "care",
+      "cat"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-cat-carrier",
+    "title": "Cat carrier",
+    "species": "cat",
+    "category": "carriers",
+    "keywords": [
+      "carrier",
+      "travel",
+      "cat",
+      "airline",
+      "approved"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "cat-cat-harness",
+    "title": "Cat harness",
+    "species": "cat",
+    "category": "leashes",
+    "keywords": [
+      "harness",
+      "leash",
+      "cat",
+      "walking",
+      "escape",
+      "resistant"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "cat-breakaway-cat-collar",
+    "title": "Breakaway cat collar",
+    "species": "cat",
+    "category": "leashes",
+    "keywords": [
+      "breakaway",
+      "safety",
+      "collar",
+      "cat",
+      "id"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "cat-cat-water-fountain",
+    "title": "Cat water fountain",
+    "species": "cat",
+    "category": "feeding",
+    "keywords": [
+      "water",
+      "fountain",
+      "cat",
+      "filter",
+      "drinking"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-ceramic-cat-bowls",
+    "title": "Ceramic cat bowls",
+    "species": "cat",
+    "category": "feeding",
+    "keywords": [
+      "ceramic",
+      "food",
+      "water",
+      "bowls",
+      "cat"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-slow-feeder-cat-bowl",
+    "title": "Slow-feeder cat bowl",
+    "species": "cat",
+    "category": "feeding",
+    "keywords": [
+      "slow",
+      "feeder",
+      "fast",
+      "eater",
+      "cat",
+      "bowl"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "cat-cat-hairball-supplement",
+    "title": "Cat hairball supplement",
+    "species": "cat",
+    "category": "supplements",
+    "keywords": [
+      "hairball",
+      "supplement",
+      "cat"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "cat-cat-coat-supplement",
+    "title": "Cat coat supplement",
+    "species": "cat",
+    "category": "supplements",
+    "keywords": [
+      "fish",
+      "oil",
+      "omega",
+      "coat",
+      "cat"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "cat-flea-and-tick-prevention-for-cats",
+    "title": "Flea-and-tick prevention for cats",
+    "species": "cat",
+    "category": "flea-tick",
+    "keywords": [
+      "flea",
+      "tick",
+      "prevention",
+      "treatment",
+      "cat"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "fish-tropical-fish-flakes",
+    "title": "Tropical fish flakes",
+    "species": "fish",
+    "category": "food",
+    "keywords": [
+      "tropical",
+      "fish",
+      "flakes",
+      "aquarium",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "fish-betta-pellets",
+    "title": "Betta pellets",
+    "species": "fish",
+    "category": "food",
+    "keywords": [
+      "betta",
+      "pellets",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "fish-goldfish-food",
+    "title": "Goldfish food",
+    "species": "fish",
+    "category": "food",
+    "keywords": [
+      "goldfish",
+      "flakes",
+      "pellets",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "fish-aquarium-filter",
+    "title": "Aquarium filter",
+    "species": "fish",
+    "category": "habitat",
+    "keywords": [
+      "aquarium",
+      "tank",
+      "filter",
+      "fish"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "fish-replacement-filter-media",
+    "title": "Replacement filter media",
+    "species": "fish",
+    "category": "habitat",
+    "keywords": [
+      "replacement",
+      "cartridge",
+      "filter",
+      "media",
+      "aquarium"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "fish-water-conditioner",
+    "title": "Water conditioner",
+    "species": "fish",
+    "category": "water-care",
+    "keywords": [
+      "tap",
+      "water",
+      "conditioner",
+      "dechlorinator",
+      "aquarium"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "fish-aquarium-test-kit",
+    "title": "Aquarium test kit",
+    "species": "fish",
+    "category": "water-care",
+    "keywords": [
+      "water",
+      "test",
+      "kit",
+      "ammonia",
+      "nitrite",
+      "nitrate",
+      "ph",
+      "aquarium"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "fish-aquarium-heater",
+    "title": "Aquarium heater",
+    "species": "fish",
+    "category": "habitat",
+    "keywords": [
+      "heater",
+      "thermostat",
+      "tropical",
+      "fish",
+      "tank"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "fish-air-pump",
+    "title": "Air pump",
+    "species": "fish",
+    "category": "habitat",
+    "keywords": [
+      "air",
+      "pump",
+      "bubbles",
+      "aquarium"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "fish-fish-net",
+    "title": "Fish net",
+    "species": "fish",
+    "category": "maintenance",
+    "keywords": [
+      "fish",
+      "net",
+      "aquarium"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "fish-gravel-vacuum",
+    "title": "Gravel vacuum",
+    "species": "fish",
+    "category": "maintenance",
+    "keywords": [
+      "gravel",
+      "vacuum",
+      "siphon",
+      "tank",
+      "cleaning"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "fish-algae-scraper",
+    "title": "Algae scraper",
+    "species": "fish",
+    "category": "maintenance",
+    "keywords": [
+      "algae",
+      "scraper",
+      "cleaner",
+      "aquarium",
+      "glass"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "bird-species-appropriate-bird-seed",
+    "title": "Species-appropriate bird seed",
+    "species": "bird",
+    "category": "food",
+    "keywords": [
+      "bird",
+      "seed",
+      "parakeet",
+      "cockatiel",
+      "finch",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "bird-bird-pellets",
+    "title": "Bird pellets",
+    "species": "bird",
+    "category": "food",
+    "keywords": [
+      "pellet",
+      "complete",
+      "bird",
+      "parrot",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "bird-millet-spray",
+    "title": "Millet spray",
+    "species": "bird",
+    "category": "treats",
+    "keywords": [
+      "millet",
+      "spray",
+      "parakeet",
+      "bird",
+      "treat"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "bird-cuttlebone",
+    "title": "Cuttlebone",
+    "species": "bird",
+    "category": "supplements",
+    "keywords": [
+      "cuttlebone",
+      "bird",
+      "calcium",
+      "beak"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "bird-bird-chew-toy",
+    "title": "Bird chew toy",
+    "species": "bird",
+    "category": "toys",
+    "keywords": [
+      "bird",
+      "chew",
+      "toy",
+      "cockatiel",
+      "parakeet"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "bird-foraging-bird-toy",
+    "title": "Foraging bird toy",
+    "species": "bird",
+    "category": "toys",
+    "keywords": [
+      "foraging",
+      "enrichment",
+      "puzzle",
+      "bird"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "bird-bird-perch",
+    "title": "Bird perch",
+    "species": "bird",
+    "category": "habitat",
+    "keywords": [
+      "perch",
+      "cage",
+      "bird",
+      "natural",
+      "wood"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "bird-cage-liner",
+    "title": "Cage liner",
+    "species": "bird",
+    "category": "cleaning",
+    "keywords": [
+      "cage",
+      "liner",
+      "paper",
+      "bird"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "bird-bird-bath",
+    "title": "Bird bath",
+    "species": "bird",
+    "category": "grooming",
+    "keywords": [
+      "bird",
+      "bath",
+      "cage"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "bird-bird-carrier",
+    "title": "Bird carrier",
+    "species": "bird",
+    "category": "carriers",
+    "keywords": [
+      "travel",
+      "carrier",
+      "bird"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "bird-bird-food-dish",
+    "title": "Bird food dish",
+    "species": "bird",
+    "category": "feeding",
+    "keywords": [
+      "food",
+      "water",
+      "dish",
+      "cage",
+      "bird"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "bird-cage-cleaning-brush",
+    "title": "Cage cleaning brush",
+    "species": "bird",
+    "category": "cleaning",
+    "keywords": [
+      "cage",
+      "cleaning",
+      "brush",
+      "bird"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "rabbit-timothy-hay",
+    "title": "Timothy hay",
+    "species": "rabbit",
+    "category": "food",
+    "keywords": [
+      "timothy",
+      "grass",
+      "hay",
+      "rabbit",
+      "bunny"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "rabbit-rabbit-pellets",
+    "title": "Rabbit pellets",
+    "species": "rabbit",
+    "category": "food",
+    "keywords": [
+      "rabbit",
+      "pellets",
+      "adult",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "rabbit-young-rabbit-food",
+    "title": "Young-rabbit food",
+    "species": "rabbit",
+    "category": "food",
+    "keywords": [
+      "young",
+      "junior",
+      "rabbit",
+      "alfalfa",
+      "pellets"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "rabbit-hay-feeder",
+    "title": "Hay feeder",
+    "species": "rabbit",
+    "category": "feeding",
+    "keywords": [
+      "hay",
+      "feeder",
+      "rack",
+      "rabbit"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "rabbit-rabbit-water-bowl",
+    "title": "Rabbit water bowl",
+    "species": "rabbit",
+    "category": "feeding",
+    "keywords": [
+      "heavy",
+      "ceramic",
+      "water",
+      "bowl",
+      "rabbit"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "rabbit-rabbit-litter",
+    "title": "Rabbit litter",
+    "species": "rabbit",
+    "category": "litter",
+    "keywords": [
+      "paper",
+      "litter",
+      "rabbit",
+      "litter",
+      "box"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "rabbit-rabbit-bedding",
+    "title": "Rabbit bedding",
+    "species": "rabbit",
+    "category": "bedding",
+    "keywords": [
+      "paper",
+      "bedding",
+      "rabbit",
+      "enclosure"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "rabbit-rabbit-chew-toy",
+    "title": "Rabbit chew toy",
+    "species": "rabbit",
+    "category": "toys",
+    "keywords": [
+      "chew",
+      "toy",
+      "rabbit",
+      "teeth",
+      "enrichment"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "rabbit-rabbit-tunnel",
+    "title": "Rabbit tunnel",
+    "species": "rabbit",
+    "category": "toys",
+    "keywords": [
+      "tunnel",
+      "hide",
+      "enrichment",
+      "rabbit"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "rabbit-rabbit-hideout",
+    "title": "Rabbit hideout",
+    "species": "rabbit",
+    "category": "habitat",
+    "keywords": [
+      "hideout",
+      "house",
+      "shelter",
+      "rabbit"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "rabbit-rabbit-carrier",
+    "title": "Rabbit carrier",
+    "species": "rabbit",
+    "category": "carriers",
+    "keywords": [
+      "travel",
+      "carrier",
+      "rabbit"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "rabbit-rabbit-grooming-brush",
+    "title": "Rabbit grooming brush",
+    "species": "rabbit",
+    "category": "grooming",
+    "keywords": [
+      "brush",
+      "shedding",
+      "rabbit",
+      "grooming"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "hamster-hamster-food",
+    "title": "Hamster food",
+    "species": "hamster",
+    "category": "food",
+    "keywords": [
+      "hamster",
+      "food",
+      "seed",
+      "pellet",
+      "mix"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "hamster-paper-hamster-bedding",
+    "title": "Paper hamster bedding",
+    "species": "hamster",
+    "category": "bedding",
+    "keywords": [
+      "paper",
+      "unscented",
+      "bedding",
+      "hamster"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "hamster-hamster-exercise-wheel",
+    "title": "Hamster exercise wheel",
+    "species": "hamster",
+    "category": "habitat",
+    "keywords": [
+      "exercise",
+      "wheel",
+      "silent",
+      "safe",
+      "hamster"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "hamster-hamster-hideout",
+    "title": "Hamster hideout",
+    "species": "hamster",
+    "category": "habitat",
+    "keywords": [
+      "hideout",
+      "house",
+      "hamster"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "hamster-hamster-chew-toy",
+    "title": "Hamster chew toy",
+    "species": "hamster",
+    "category": "toys",
+    "keywords": [
+      "chew",
+      "toy",
+      "hamster",
+      "teeth"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "hamster-hamster-sand-bath",
+    "title": "Hamster sand bath",
+    "species": "hamster",
+    "category": "grooming",
+    "keywords": [
+      "sand",
+      "bath",
+      "hamster"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "hamster-hamster-water-bottle",
+    "title": "Hamster water bottle",
+    "species": "hamster",
+    "category": "feeding",
+    "keywords": [
+      "water",
+      "bottle",
+      "hamster",
+      "cage"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "hamster-hamster-carrier",
+    "title": "Hamster carrier",
+    "species": "hamster",
+    "category": "carriers",
+    "keywords": [
+      "travel",
+      "carrier",
+      "hamster"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "hamster-hamster-enclosure",
+    "title": "Hamster enclosure",
+    "species": "hamster",
+    "category": "habitat",
+    "keywords": [
+      "enclosure",
+      "cage",
+      "habitat",
+      "hamster"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "hamster-hamster-nesting-material",
+    "title": "Hamster nesting material",
+    "species": "hamster",
+    "category": "bedding",
+    "keywords": [
+      "nesting",
+      "material",
+      "paper",
+      "hamster"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "reptile-species-appropriate-reptile-food",
+    "title": "Species-appropriate reptile food",
+    "species": "reptile",
+    "category": "food",
+    "keywords": [
+      "reptile",
+      "food",
+      "gecko",
+      "turtle",
+      "bearded",
+      "dragon",
+      "species"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "reptile-reptile-substrate",
+    "title": "Reptile substrate",
+    "species": "reptile",
+    "category": "habitat",
+    "keywords": [
+      "substrate",
+      "bedding",
+      "reptile",
+      "enclosure"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "reptile-heat-lamp",
+    "title": "Heat lamp",
+    "species": "reptile",
+    "category": "habitat",
+    "keywords": [
+      "heat",
+      "lamp",
+      "basking",
+      "reptile"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "reptile-under-tank-heater",
+    "title": "Under-tank heater",
+    "species": "reptile",
+    "category": "habitat",
+    "keywords": [
+      "heat",
+      "mat",
+      "under",
+      "tank",
+      "reptile"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "reptile-temperature-thermostat",
+    "title": "Temperature thermostat",
+    "species": "reptile",
+    "category": "habitat",
+    "keywords": [
+      "thermostat",
+      "temperature",
+      "controller",
+      "reptile"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "reptile-digital-thermometer-hygrometer",
+    "title": "Digital thermometer-hygrometer",
+    "species": "reptile",
+    "category": "habitat",
+    "keywords": [
+      "thermometer",
+      "hygrometer",
+      "humidity",
+      "reptile"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "reptile-reptile-hide",
+    "title": "Reptile hide",
+    "species": "reptile",
+    "category": "habitat",
+    "keywords": [
+      "hide",
+      "cave",
+      "shelter",
+      "reptile"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "reptile-reptile-water-dish",
+    "title": "Reptile water dish",
+    "species": "reptile",
+    "category": "feeding",
+    "keywords": [
+      "water",
+      "dish",
+      "reptile",
+      "enclosure"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "reptile-reptile-carrier",
+    "title": "Reptile carrier",
+    "species": "reptile",
+    "category": "carriers",
+    "keywords": [
+      "transport",
+      "carrier",
+      "reptile"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "reptile-reptile-calcium-supplement",
+    "title": "Reptile calcium supplement",
+    "species": "reptile",
+    "category": "supplements",
+    "keywords": [
+      "calcium",
+      "supplement",
+      "reptile"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "guinea-pig-guinea-pig-hay",
+    "title": "Guinea pig hay",
+    "species": "guinea-pig",
+    "category": "food",
+    "keywords": [
+      "timothy",
+      "hay",
+      "guinea",
+      "pig",
+      "cavy"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "guinea-pig-guinea-pig-pellets",
+    "title": "Guinea pig pellets",
+    "species": "guinea-pig",
+    "category": "food",
+    "keywords": [
+      "guinea",
+      "pig",
+      "pellets",
+      "vitamin",
+      "c",
+      "food"
+    ],
+    "guidance": "Check the current ingredient label, life-stage statement, feeding directions, and suitability. Ask a veterinarian about allergies, medical diets, or diet changes."
+  },
+  {
+    "id": "guinea-pig-guinea-pig-bedding",
+    "title": "Guinea pig bedding",
+    "species": "guinea-pig",
+    "category": "bedding",
+    "keywords": [
+      "paper",
+      "bedding",
+      "guinea",
+      "pig"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "guinea-pig-guinea-pig-hideout",
+    "title": "Guinea pig hideout",
+    "species": "guinea-pig",
+    "category": "habitat",
+    "keywords": [
+      "hide",
+      "house",
+      "guinea",
+      "pig"
+    ],
+    "guidance": "Confirm the requirements for the exact species and enclosure, and follow the current product instructions."
+  },
+  {
+    "id": "guinea-pig-guinea-pig-chew-toy",
+    "title": "Guinea pig chew toy",
+    "species": "guinea-pig",
+    "category": "toys",
+    "keywords": [
+      "chew",
+      "toy",
+      "guinea",
+      "pig",
+      "teeth"
+    ],
+    "guidance": "Choose an appropriate size and material, supervise use, and replace damaged items."
+  },
+  {
+    "id": "guinea-pig-guinea-pig-water-bottle",
+    "title": "Guinea pig water bottle",
+    "species": "guinea-pig",
+    "category": "feeding",
+    "keywords": [
+      "water",
+      "bottle",
+      "guinea",
+      "pig",
+      "cage"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "guinea-pig-guinea-pig-carrier",
+    "title": "Guinea pig carrier",
+    "species": "guinea-pig",
+    "category": "carriers",
+    "keywords": [
+      "travel",
+      "carrier",
+      "guinea",
+      "pig"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "guinea-pig-guinea-pig-grooming-brush",
+    "title": "Guinea pig grooming brush",
+    "species": "guinea-pig",
+    "category": "grooming",
+    "keywords": [
+      "brush",
+      "grooming",
+      "guinea",
+      "pig"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "any-pet-first-aid-supply-kit",
+    "title": "Pet first-aid supply kit",
+    "species": "any",
+    "category": "safety",
+    "keywords": [
+      "first",
+      "aid",
+      "supply",
+      "kit",
+      "pet",
+      "emergency"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "any-pet-id-tag",
+    "title": "Pet ID tag",
+    "species": "any",
+    "category": "safety",
+    "keywords": [
+      "identification",
+      "id",
+      "tag",
+      "pet",
+      "collar"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "any-travel-water-bottle",
+    "title": "Travel water bottle",
+    "species": "any",
+    "category": "travel",
+    "keywords": [
+      "travel",
+      "water",
+      "bottle",
+      "dispenser",
+      "pet"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "any-collapsible-travel-bowls",
+    "title": "Collapsible travel bowls",
+    "species": "any",
+    "category": "travel",
+    "keywords": [
+      "collapsible",
+      "food",
+      "water",
+      "bowls",
+      "pet"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  },
+  {
+    "id": "any-airtight-pet-food-container",
+    "title": "Airtight pet-food container",
+    "species": "any",
+    "category": "feeding",
+    "keywords": [
+      "airtight",
+      "food",
+      "container",
+      "storage",
+      "pet"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "any-pet-food-measuring-scoop",
+    "title": "Pet food measuring scoop",
+    "species": "any",
+    "category": "feeding",
+    "keywords": [
+      "measuring",
+      "scoop",
+      "portion",
+      "pet",
+      "food"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "any-pet-safe-enzyme-cleaner",
+    "title": "Pet-safe enzyme cleaner",
+    "species": "any",
+    "category": "cleaning",
+    "keywords": [
+      "enzyme",
+      "cleaner",
+      "stain",
+      "odor",
+      "pet"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "any-pet-hair-remover",
+    "title": "Pet-hair remover",
+    "species": "any",
+    "category": "cleaning",
+    "keywords": [
+      "hair",
+      "remover",
+      "lint",
+      "furniture",
+      "pet"
+    ],
+    "guidance": "Check dimensions, materials, compatibility, and the current product instructions before choosing."
+  },
+  {
+    "id": "any-portable-pet-gate",
+    "title": "Portable pet gate",
+    "species": "any",
+    "category": "safety",
+    "keywords": [
+      "portable",
+      "gate",
+      "barrier",
+      "pet"
+    ],
+    "guidance": "Check the current label and species, age, and weight limits. Ask a veterinarian before using treatments, supplements, or emergency-care products."
+  },
+  {
+    "id": "any-emergency-evacuation-carrier",
+    "title": "Emergency evacuation carrier",
+    "species": "any",
+    "category": "carriers",
+    "keywords": [
+      "emergency",
+      "evacuation",
+      "carrier",
+      "pet"
+    ],
+    "guidance": "Measure the pet, check fit and weight limits, and confirm current travel or safety requirements."
+  }
+]

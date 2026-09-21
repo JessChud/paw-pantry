@@ -158,6 +158,7 @@ class RetailerOption(BaseModel):
     affiliate: bool = True
     opens_after_user_click: bool = True
     rel: str = "sponsored nofollow noopener"
+    source_page_url: Optional[str] = None
 
 
 class CatalogProduct(BaseModel):
@@ -172,6 +173,8 @@ class CatalogProduct(BaseModel):
     catalog_status: Literal["active", "retired"]
     replacement_product_id: Optional[int]
     amazon_link_available: bool
+    verified_amazon_product_link: bool
+    affiliate_search_available: bool
     chewy_link_available: bool
     retailer_options: list[RetailerOption]
 
@@ -183,9 +186,11 @@ class ProductLinkResult(BaseModel):
     button_label: str
     url: str
     disclosure: str
+    kind: Literal["product", "search"] = "product"
     affiliate: bool = True
     opens_after_user_click: bool = True
     rel: str = "sponsored nofollow noopener"
+    source_page_url: Optional[str] = None
 
 
 class InventoryConcept(BaseModel):
@@ -195,12 +200,19 @@ class InventoryConcept(BaseModel):
     category: str
     keywords: list[str]
     guidance: str
+    base_intent_id: str
+    variant_label: Optional[str] = None
+
+
+class InventoryListing(InventoryConcept):
+    website_url: str
+    retailer_options: list[RetailerOption]
 
 
 class ShoppingOptionsResult(BaseModel):
     query: str
     curated_products: list[CatalogProduct]
-    matched_inventory: list[InventoryConcept]
+    matched_inventory: list[InventoryListing]
     broader_amazon_search: RetailerOption
     matching_method: Literal["keyword", "hybrid-semantic"]
     semantic_model: Optional[str]
@@ -212,12 +224,15 @@ class CatalogStats(BaseModel):
     retired_products: int
     shopping_intents: int
     verified_amazon_products: int
+    affiliate_enabled_active_products: int
+    affiliate_enabled_intents: int
     verified_chewy_products: int
     species_counts: dict[str, int]
     category_counts: dict[str, int]
     shopping_species_counts: dict[str, int]
     shopping_category_counts: dict[str, int]
     broader_amazon_search_enabled: bool
+    first_party_recommendation_pages: int
     semantic_search_enabled: bool
     semantic_model: Optional[str]
 
@@ -261,7 +276,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry Connector API", version="0.7.0", lifespan=lifespan,
+    title="Paw Pantry Connector API", version="0.8.0", lifespan=lifespan,
     description="Stateless pet-supply search and refill estimates for Muse. "
                 "The connector cannot read or write Paw Pantry's private pet workspace. "
                 "Retailer actions open only after the user chooses them, and the supplied "
@@ -320,6 +335,42 @@ def valid_amazon_link(url):
 DISCLOSURE = ("Paw Pantry may earn a commission if you buy through this link, "
               "at no extra cost to you.")
 AMAZON_DISCLOSURE = DISCLOSURE + " As an Amazon Associate I earn from qualifying purchases."
+PUBLIC_BASE_URL = "https://paw-pantry.onrender.com"
+
+
+def amazon_search_option(query_text: str, species: Optional[str] = None,
+                         category: Optional[str] = None,
+                         source_page_url: Optional[str] = None,
+                         button_label: str = "See options on Amazon") -> dict:
+    """Create a clearly labeled, tagged Amazon search action.
+
+    Search actions are used when Paw Pantry has relevant original guidance but no
+    individually verified ASIN. They are never represented as exact products.
+    """
+    terms = [query_text.strip()]
+    lowered = query_text.lower()
+    for value in (species, category):
+        if value and value.lower() not in lowered:
+            terms.append(value.lower())
+    terms.append("pet supplies")
+    url = "https://www.amazon.com/s/?" + urlencode({
+        "field-keywords": " ".join(terms),
+        "search-alias": "aps",
+        "tag": "pawpantry-20",
+        "linkCode": "osi",
+    })
+    return {
+        "retailer": "amazon",
+        "destination": "Amazon",
+        "button_label": button_label,
+        "url": url,
+        "disclosure": AMAZON_DISCLOSURE,
+        "kind": "search",
+        "affiliate": True,
+        "opens_after_user_click": True,
+        "rel": "sponsored nofollow noopener",
+        "source_page_url": source_page_url,
+    }
 
 
 def chewy_program():
@@ -333,6 +384,7 @@ def retailer_options(p: Product, metadata: Optional[dict] = None) -> list[dict]:
     if metadata.get("catalog_status") == "retired":
         return []
     options = []
+    source_page_url = f"{PUBLIC_BASE_URL}/catalog#product-{p.id}"
     if valid_amazon_link(p.amazon_url):
         options.append({
             "retailer": "amazon",
@@ -344,7 +396,14 @@ def retailer_options(p: Product, metadata: Optional[dict] = None) -> list[dict]:
             "affiliate": True,
             "opens_after_user_click": True,
             "rel": "sponsored nofollow noopener",
+            "source_page_url": source_page_url,
         })
+    else:
+        options.append(amazon_search_option(
+            " ".join(value for value in (p.brand, p.name) if value),
+            p.species, p.category, source_page_url,
+            button_label="Find this product type on Amazon",
+        ))
     if valid_chewy_link(p.chewy_url, metadata, chewy_program()):
         options.append({
             "retailer": "chewy",
@@ -356,6 +415,7 @@ def retailer_options(p: Product, metadata: Optional[dict] = None) -> list[dict]:
             "affiliate": True,
             "opens_after_user_click": True,
             "rel": "sponsored nofollow noopener",
+            "source_page_url": source_page_url,
         })
     return options
 
@@ -368,10 +428,14 @@ def product_to_dict(p: Product) -> dict:
         "id": p.id, "name": p.name, "brand": p.brand,
         "species": p.species, "category": p.category,
         "package_size": p.package_size, "notes": p.notes,
-        "website_url": None if retired else f"https://paw-pantry.onrender.com/catalog#product-{p.id}",
+        "website_url": None if retired else f"{PUBLIC_BASE_URL}/catalog#product-{p.id}",
         "catalog_status": "retired" if retired else "active",
         "replacement_product_id": metadata.get("replacement_product_id"),
         "amazon_link_available": any(option["retailer"] == "amazon" for option in options),
+        "verified_amazon_product_link": valid_amazon_link(p.amazon_url) and not retired,
+        "affiliate_search_available": any(
+            option["retailer"] == "amazon" and option["kind"] == "search"
+            for option in options),
         "chewy_link_available": any(option["retailer"] == "chewy" for option in options),
         "retailer_options": options,
     }
@@ -448,10 +512,23 @@ def intent_search_score(intent: dict, query: str) -> int:
     requested = search_tokens(query)
     if not requested:
         return 1
+    normalized_query = " ".join(requested)
+    normalized_title = " ".join(search_tokens(intent["title"]))
     text = " ".join((intent["title"], intent["species"], intent["category"],
                      " ".join(intent["keywords"]))).lower()
     available = set(search_tokens(text))
     score = 20 if query.strip().lower() in text else 0
+    if normalized_title and (normalized_title in normalized_query
+                             or normalized_query in normalized_title):
+        score += 40
+    if intent.get("variant_label") is None:
+        score += 2
+    else:
+        base_tokens = set(search_tokens(intent["title"].split(" — ", 1)[0]))
+        label_tokens = set(search_tokens(intent["variant_label"])) - {"option"}
+        requested_set = set(requested)
+        if base_tokens and label_tokens and base_tokens <= requested_set and label_tokens <= requested_set:
+            score += 45
     for token in requested:
         if token in available:
             score += 6
@@ -469,6 +546,21 @@ def intent_embedding_text(intent: dict) -> str:
             f"Selection guidance: {intent['guidance']}")
 
 
+def intent_website_url(intent: dict) -> str:
+    return f"{PUBLIC_BASE_URL}/shop/{intent['id']}"
+
+
+def intent_to_listing(intent: dict) -> dict:
+    """Add a first-party source page and monetizable, user-clicked retailer action."""
+    source_page_url = intent_website_url(intent)
+    return {
+        **intent,
+        "website_url": source_page_url,
+        "retailer_options": [amazon_search_option(
+            intent["title"], intent["species"], intent["category"], source_page_url)],
+    }
+
+
 def matching_intents(species: Optional[str], category: Optional[str],
                      query_text: Optional[str], limit: int) -> tuple[list[dict], str]:
     intents = [intent for intent in inventory_concepts()
@@ -477,14 +569,19 @@ def matching_intents(species: Optional[str], category: Optional[str],
     method = "keyword"
     if query_text:
         lexical = {intent["id"]: intent_search_score(intent, query_text) for intent in intents}
-        semantic = SEMANTIC_RANKER.rank(
-            query_text, {intent["id"]: intent_embedding_text(intent) for intent in intents})
+        # Embed only the reviewed base concepts. The thousands of constraint
+        # variants inherit their base score, keeping the small-model request fast
+        # and inexpensive while lexical ranking distinguishes the variant.
+        bases = {intent["id"]: intent_embedding_text(intent) for intent in intents
+                 if intent.get("variant_label") is None}
+        semantic = SEMANTIC_RANKER.rank(query_text, bases)
         if semantic:
             method = "hybrid-semantic"
             maximum = max(lexical.values(), default=0) or 1
             combined = {
                 intent["id"]: (0.35 * lexical[intent["id"]] / maximum
-                               + 0.65 * max(0.0, semantic.get(intent["id"], 0.0)))
+                               + 0.65 * max(0.0, semantic.get(
+                                   intent.get("base_intent_id", intent["id"]), 0.0)))
                 for intent in intents
             }
             intents = sorted(intents, key=lambda intent: (-combined[intent["id"]], intent["id"]))
@@ -526,33 +623,6 @@ def matching_products(db: Session, species: Optional[str], category: Optional[st
                 products, key=lambda product: (-lexical[product.id], product.id))
                 if lexical[product.id] > 0]
     return products[:limit], method
-
-
-def amazon_search_option(query_text: str, species: Optional[str],
-                         category: Optional[str]) -> dict:
-    terms = [query_text.strip()]
-    lowered = query_text.lower()
-    for value in (species, category):
-        if value and value.lower() not in lowered:
-            terms.append(value.lower())
-    terms.append("pet supplies")
-    url = "https://www.amazon.com/s/?" + urlencode({
-        "field-keywords": " ".join(terms),
-        "search-alias": "aps",
-        "tag": "pawpantry-20",
-        "linkCode": "osi",
-    })
-    return {
-        "retailer": "amazon",
-        "destination": "Amazon",
-        "button_label": "See more options on Amazon",
-        "url": url,
-        "disclosure": AMAZON_DISCLOSURE,
-        "kind": "search",
-        "affiliate": True,
-        "opens_after_user_click": True,
-        "rel": "sponsored nofollow noopener",
-    }
 
 
 def seed():
@@ -671,6 +741,15 @@ def public_catalog(q: str = Query(default="", max_length=200),
         if valid_amazon_link(p.amazon_url):
             links.append(f'<div class="retailer"><a class="link" rel="sponsored nofollow noopener" href="{escape(p.amazon_url, quote=True)}">Check on Amazon</a>'
                          '<p class="link-disclosure">Affiliate link — Paw Pantry may earn a commission.</p></div>')
+        else:
+            fallback = amazon_search_option(
+                " ".join(value for value in (p.brand, p.name) if value),
+                p.species, p.category,
+                f"{PUBLIC_BASE_URL}/catalog#product-{p.id}",
+                button_label="Find this product type on Amazon",
+            )
+            links.append(f'<div class="retailer"><a class="link" rel="sponsored nofollow noopener" href="{escape(fallback["url"], quote=True)}">Find this product type on Amazon</a>'
+                         '<p class="link-disclosure">Affiliate search link — results can change. Paw Pantry may earn a commission.</p></div>')
         if valid_chewy_link(p.chewy_url, source, program):
             links.append(f'<div class="retailer"><a class="link" rel="sponsored nofollow noopener" href="{escape(p.chewy_url, quote=True)}">Check on Chewy</a>'
                          '<p class="link-disclosure">Affiliate link — Paw Pantry may earn a commission.</p></div>')
@@ -696,6 +775,62 @@ def public_catalog(q: str = Query(default="", max_length=200),
         "{{PRODUCTS}}": ''.join(cards) or '<p>No matching products yet. Try a broader search.</p>',
     }
     return re.sub(r"\{\{[A-Z]+\}\}", lambda match: replacements.get(match.group(), match.group()), page)
+
+
+@app.get("/recommendations", response_class=HTMLResponse, include_in_schema=False)
+def public_recommendations(q: str = Query(default="", max_length=200),
+                           species: str = Query(default="", max_length=60),
+                           category: str = Query(default="", max_length=60)):
+    """Browsable first-party index for the broad shopping-intent library."""
+    matches, _ = matching_intents(species or None, category or None, q or None, 36)
+    all_intents = inventory_concepts()
+    cards = ''.join(
+        f'<article><p class="tag">{escape(row["species"].replace("-", " ").title())} · '
+        f'{escape(row["category"].replace("-", " ").title())}</p>'
+        f'<h2><a href="/shop/{escape(row["id"], quote=True)}">{escape(row["title"])}</a></h2>'
+        f'<p>{escape(row["guidance"])}</p></article>'
+        for row in matches
+    ) or '<p>No matching product types yet. Try a broader search.</p>'
+
+    def options(values, selected, label):
+        return f'<option value="">{label}</option>' + ''.join(
+            f'<option value="{escape(value, quote=True)}"'
+            f'{(" selected" if value == selected.lower() else "")}>'
+            f'{escape(value.replace("-", " ").title())}</option>'
+            for value in sorted(values))
+
+    page = (BASE_DIR / "static" / "recommendations.html").read_text()
+    replacements = {
+        "{{QUERY}}": escape(q, quote=True),
+        "{{SPECIES}}": options({row["species"] for row in all_intents}, species, "All pets"),
+        "{{CATEGORIES}}": options(
+            {row["category"] for row in all_intents}, category, "All categories"),
+        "{{TOTAL}}": f"{len(all_intents):,}",
+        "{{COUNT}}": str(len(matches)),
+        "{{RESULTS}}": cards,
+    }
+    return re.sub(r"\{\{[A-Z]+\}\}", lambda match: replacements.get(match.group(), match.group()), page)
+
+
+@app.get("/shop/{intent_id}", response_class=HTMLResponse, include_in_schema=False)
+def shopping_intent_page(intent_id: str):
+    """First-party guidance page with a deliberate Amazon affiliate action."""
+    intent = next((row for row in inventory_concepts() if row["id"] == intent_id), None)
+    if not intent:
+        raise HTTPException(404, "shopping recommendation not found")
+    source_page_url = intent_website_url(intent)
+    amazon = amazon_search_option(
+        intent["title"], intent["species"], intent["category"], source_page_url)
+    page = (BASE_DIR / "static" / "shop.html").read_text()
+    replacements = {
+        "{{TITLE}}": escape(intent["title"]),
+        "{{SPECIES}}": escape(intent["species"].replace("-", " ").title()),
+        "{{CATEGORY}}": escape(intent["category"].replace("-", " ").title()),
+        "{{GUIDANCE}}": escape(intent["guidance"]),
+        "{{AMAZON_URL}}": escape(amazon["url"], quote=True),
+        "{{CANONICAL_URL}}": escape(source_page_url, quote=True),
+    }
+    return re.sub(r"\{\{[A-Z_]+\}\}", lambda match: replacements.get(match.group(), match.group()), page)
 
 
 # ---- pets ----
@@ -822,6 +957,9 @@ def catalog_stats(db: Session = Depends(get_db)):
         "shopping_intents": len(intents),
         "verified_amazon_products": sum(valid_amazon_link(product.amazon_url)
                                         for product in active),
+        "affiliate_enabled_active_products": sum(bool(retailer_options(product))
+                                                 for product in active),
+        "affiliate_enabled_intents": len(intents),
         "verified_chewy_products": sum(valid_chewy_link(
             product.chewy_url, metadata.get(str(product.id), {}), chewy_program())
             for product in active),
@@ -830,20 +968,21 @@ def catalog_stats(db: Session = Depends(get_db)):
         "shopping_species_counts": shopping_species_counts,
         "shopping_category_counts": shopping_category_counts,
         "broader_amazon_search_enabled": True,
+        "first_party_recommendation_pages": len(intents),
         "semantic_search_enabled": SEMANTIC_RANKER.enabled,
         "semantic_model": SEMANTIC_RANKER.model if SEMANTIC_RANKER.enabled else None,
     }
 
 
 @app.get("/inventory", dependencies=[Depends(require_connector_key)],
-         response_model=list[InventoryConcept])
+         response_model=list[InventoryListing])
 def inventory(species: Optional[str] = Query(default=None, max_length=60),
               category: Optional[str] = Query(default=None, max_length=60),
               q: Optional[str] = Query(default=None, max_length=200),
-              limit: int = Query(default=25, ge=1, le=50)):
+              limit: int = Query(default=25, ge=1, le=100)):
     """Search broad product-type coverage; records are not live retailer stock."""
     matches, _ = matching_intents(species, category, q, limit)
-    return matches
+    return [intent_to_listing(intent) for intent in matches]
 
 
 @app.get("/shopping-options", dependencies=[Depends(require_connector_key)],
@@ -851,7 +990,7 @@ def inventory(species: Optional[str] = Query(default=None, max_length=60),
 def shopping_options(q: str = Query(min_length=2, max_length=200),
                      species: Optional[str] = Query(default=None, max_length=60),
                      category: Optional[str] = Query(default=None, max_length=60),
-                     limit: int = Query(default=5, ge=1, le=10),
+                     limit: int = Query(default=5, ge=1, le=20),
                      db: Session = Depends(get_db)):
     """Return ranked catalog matches plus a broader, user-initiated Amazon search.
 
@@ -867,8 +1006,11 @@ def shopping_options(q: str = Query(min_length=2, max_length=200),
     return {
         "query": q,
         "curated_products": products,
-        "matched_inventory": intents,
-        "broader_amazon_search": amazon_search_option(q, species, category),
+        "matched_inventory": [intent_to_listing(intent) for intent in intents],
+        "broader_amazon_search": amazon_search_option(
+            q, species, category,
+            f"{PUBLIC_BASE_URL}/recommendations?{urlencode({'q': q})}",
+            button_label="See more options on Amazon"),
         "matching_method": method,
         "semantic_model": SEMANTIC_RANKER.model if method == "hybrid-semantic" else None,
         "guidance": ("Inventory matches are product types, not live stock or suitability "
@@ -892,13 +1034,20 @@ def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon
     if retailer == "chewy" and not valid_chewy_link(url, source, chewy_program()):
         raise HTTPException(409, "verified Chewy affiliate link not available for this product yet")
     if retailer == "amazon" and not valid_amazon_link(url):
-        raise HTTPException(409, "affiliate tracking tag is not configured correctly")
+        option = amazon_search_option(
+            " ".join(value for value in (p.brand, p.name) if value),
+            p.species, p.category,
+            f"{PUBLIC_BASE_URL}/catalog#product-{p.id}",
+            button_label="Find this product type on Amazon")
+        return {"product": product_to_dict(p), **option}
     destination = "Amazon" if retailer == "amazon" else "Chewy"
     return {"product": product_to_dict(p), "retailer": retailer,
             "url": url, "disclosure": AMAZON_DISCLOSURE if retailer == "amazon" else DISCLOSURE,
             "destination": destination, "button_label": f"Check on {destination}",
+            "kind": "product",
             "affiliate": True, "opens_after_user_click": True,
-            "rel": "sponsored nofollow noopener"}
+            "rel": "sponsored nofollow noopener",
+            "source_page_url": f"{PUBLIC_BASE_URL}/catalog#product-{p.id}"}
 
 
 @app.post("/refill-estimate", dependencies=[Depends(require_connector_key)],
@@ -975,11 +1124,12 @@ def muse_openapi():
     ]
     schema = get_openapi(
         title="Paw Pantry Connector API",
-        version="0.7.0",
+        version="0.8.0",
         description=("Stateless pet-supply search and refill estimates for Muse. "
                      "This contract cannot access Paw Pantry's private pet-profile workspace. "
-                     "Show every returned affiliate disclosure beside its retailer action and "
-                     "open retailer URLs only after a user chooses them."),
+                     "Inventory matches include a first-party Paw Pantry guidance page and a "
+                     "tagged retailer search action. Show every returned affiliate disclosure "
+                     "beside its retailer action and open retailer URLs only after a user chooses them."),
         routes=connector_routes,
     )
     schema["servers"] = [{"url": "https://paw-pantry.onrender.com"}]

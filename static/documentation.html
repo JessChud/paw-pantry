@@ -20,8 +20,8 @@
 <h2>Connector operations</h2>
 <ul>
   <li><code>GET /products</code> — filter the curated catalog by query, species, and category.</li>
-  <li><code>GET /inventory</code> — search 174 broad product-type coverage records across common pets and supply categories. These are matching concepts, not live retailer stock.</li>
-  <li><code>GET /shopping-options</code> — rank curated matches and return a broader Amazon search action.</li>
+  <li><code>GET /inventory</code> — search 2,771 product-type and shopping-constraint records across 20 pet types and 23 supply categories. These are matching concepts, not live retailer stock.</li>
+  <li><code>GET /shopping-options</code> — rank curated matches and return clearly typed Amazon product or search actions.</li>
   <li><code>GET /products/{product_id}/link</code> — return one validated, display-ready retailer action.</li>
   <li><code>POST /refill-estimate</code> — calculate days left, run-out date, and reorder date without saving the inputs.</li>
   <li><code>GET /catalog-stats</code> — return non-sensitive coverage counts.</li>
@@ -29,6 +29,7 @@
 </ul>
 
 <h2>Retailer actions</h2>
+<p>Every active curated product and shopping-intent record has an Amazon affiliate opportunity. Twenty-three catalog entries use individually checked ASIN links; the remaining paths are labeled as changing Amazon searches. Each inventory result also links to an original Paw Pantry recommendation page at <code>/shop/{intent_id}</code>.</p>
 <p>Retailer URLs open only after the user chooses an action. The client must display the returned affiliate disclosure beside the action. Paw Pantry does not add products to a cart, place orders, process payments, or receive payment-card details. Product availability, price, suitability, checkout, shipping, and returns are controlled by the retailer.</p>
 
 <h2>Data handling</h2>

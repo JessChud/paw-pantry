@@ -738,6 +738,7 @@ def public_catalog(q: str = Query(default="", max_length=200),
     for p in products:
         links = []
         source = sources.get(str(p.id), {})
+        display_name = " ".join(value for value in (p.brand, p.name) if value)
         if valid_amazon_link(p.amazon_url):
             links.append(f'<div class="retailer"><a class="link" rel="sponsored nofollow noopener" href="{escape(p.amazon_url, quote=True)}">Check on Amazon</a>'
                          '<p class="link-disclosure">Affiliate link — Paw Pantry may earn a commission.</p></div>')
@@ -760,11 +761,16 @@ def public_catalog(q: str = Query(default="", max_length=200),
         cards.append(f'<article id="product-{p.id}"><p class="tag">'
                      f'<img class="pet-icon" src="/static/pets/{pet_icon}.svg" width="38" height="38" alt="" aria-hidden="true" loading="lazy">'
                      f'{escape(p.species)} · {escape(p.category)}</p>'
-                     f'<h2>{escape(p.brand)} {escape(p.name)}</h2>'
+                     f'<h2>{escape(display_name)}</h2>'
                      f'<p>{escape(p.package_size)}</p><p>{escape(p.notes)}</p>{"".join(links)}</article>')
     def options(values, selected, label):
+        display_labels = {
+            "flea-tick": "Flea & Tick",
+            "guinea-pig": "Guinea Pig",
+            "water-care": "Water Care",
+        }
         return f'<option value="">{label}</option>' + ''.join(
-            f'<option value="{escape(v, quote=True)}"{(" selected" if v == selected.lower() else "")}>{escape(v.replace("-", " & ").title())}</option>'
+            f'<option value="{escape(v, quote=True)}"{(" selected" if v == selected.lower() else "")}>{escape(display_labels.get(v, v.replace("-", " ").title()))}</option>'
             for v in sorted(values))
     page = (BASE_DIR / "static" / "catalog.html").read_text()
     replacements = {

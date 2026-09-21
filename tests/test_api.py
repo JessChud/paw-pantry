@@ -388,6 +388,17 @@ def test_public_catalog_filters_and_escapes(api):
     assert 'tag=pawpantry-20' in response.text
 
 
+def test_catalog_labels_and_blank_brands_render_cleanly(api):
+    client, _ = api
+    client.headers.pop('X-API-Key')
+    page = client.get('/catalog', params={'q': 'ORIJEN'})
+    assert page.status_code == 200
+    assert '<h2> ORIJEN' not in page.text
+    assert '<h2>ORIJEN' in page.text
+    assert '>Guinea Pig</option>' in page.text
+    assert '>Water Care</option>' in page.text
+
+
 def test_wrong_tracking_tag_is_not_published(api):
     client, module = api
     with module.SessionLocal.begin() as db:

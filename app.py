@@ -276,7 +276,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry Connector API", version="0.11.0", lifespan=lifespan,
+    title="Paw Pantry Connector API", version="0.12.0", lifespan=lifespan,
     description="Stateless pet-supply search and refill estimates for Muse. "
                 "The connector cannot read or write Paw Pantry's private pet workspace. "
                 "Retailer actions open only after the user chooses them, and the supplied "
@@ -1233,7 +1233,7 @@ def muse_openapi():
     ]
     schema = get_openapi(
         title="Paw Pantry Connector API",
-        version="0.11.0",
+        version="0.12.0",
         description=("Stateless pet-supply search and refill estimates for Muse. "
                      "This contract cannot access Paw Pantry's private pet-profile workspace. "
                      "Inventory matches include a first-party Paw Pantry guidance page and a "

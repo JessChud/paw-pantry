@@ -1,6 +1,6 @@
 """Synchronize the reviewed Amazon expansion into catalog data.
 
-The source file contains ASINs and exact listing titles manually reviewed in
+The source file contains ASINs and exact displayed titles reviewed from ordinary
 Amazon search results on 2026-09-21. This builder performs no network requests
 and never opens affiliate links.
 """
@@ -16,7 +16,8 @@ EXPANSION_PATH = ROOT / "data" / "amazon_product_expansion.json"
 PRODUCTS_PATH = ROOT / "data" / "seed_products.json"
 SOURCES_PATH = ROOT / "data" / "catalog_sources.json"
 FIRST_EXPANSION_ID = 31
-EXPECTED_EXPANSION_RECORDS = 491
+EXPECTED_EXPANSION_RECORDS = 975
+MANUALLY_REVIEWED_RECORDS = 491
 CHECKED_DATE = "2026-09-21"
 AFFILIATE_TAG = "pawpantry-20"
 FORMAT_SOURCE = "https://affiliate-program.amazon.com/help/node/topic/GJMMT7G4C8K4Y3AY"
@@ -71,12 +72,17 @@ def build() -> None:
             "amazon_url": f"https://www.amazon.com/dp/{asin}/ref=nosim?tag={AFFILIATE_TAG}",
             "chewy_url": "",
         })
+        link_source = (
+            "Amazon search listing reviewed September 21, 2026; ASIN and displayed title recorded manually."
+            if offset < MANUALLY_REVIEWED_RECORDS else
+            "Amazon public search listing reviewed September 21, 2026; ASIN and displayed title retained in the reviewed expansion file."
+        )
         new_sources[str(product_id)] = {
             "amazon_asin": asin,
             "amazon_product_url": f"https://www.amazon.com/dp/{asin}",
             "amazon_checked": CHECKED_DATE,
             "verified_variant": title.strip(),
-            "amazon_link_source": "Amazon search listing reviewed September 21, 2026; ASIN and displayed title recorded manually.",
+            "amazon_link_source": link_source,
             "affiliate_link_method": f"Amazon documented tagged text-link format; {AFFILIATE_TAG}",
             "affiliate_format_source": FORMAT_SOURCE,
             "catalog_status": "active",

@@ -170,6 +170,9 @@ def test_catalog_upsert_preserves_profile_and_supply(api, tmp_path, monkeypatch)
     pet_id = pet(client)
     client.post(f'/pets/{pet_id}/supplies', json=supply_payload())
     rows = json.loads((module.BASE_DIR / 'data/seed_products.json').read_text())
+    sources = json.loads((module.BASE_DIR / 'data/catalog_sources.json').read_text())
+    active_count = sum(source.get('catalog_status', 'active') == 'active'
+                       for source in sources.values())
     rows[0]['notes'] = 'Updated catalog content'
     (tmp_path / 'data').mkdir()
     (tmp_path / 'data/seed_products.json').write_text(json.dumps(rows))
@@ -179,7 +182,7 @@ def test_catalog_upsert_preserves_profile_and_supply(api, tmp_path, monkeypatch)
     assert client.get('/products').json()[0]['notes'] == 'Updated catalog content'
     products = client.get('/products', params={'limit': 500}).json()
     products += client.get('/products', params={'limit': 500, 'offset': 500}).json()
-    assert len(products) == len(rows)
+    assert len(products) == active_count
     assert client.get(f'/pets/{pet_id}').status_code == 200
     assert len(client.get(f'/pets/{pet_id}/supplies').json()) == 1
 
@@ -233,7 +236,9 @@ def test_open_ended_shopping_search_is_ranked_and_has_broad_amazon_fallback(api)
     assert result['query'] == 'durable chew toy for my puppy'
     assert result['matching_method'] == 'keyword'
     assert result['semantic_model'] is None
-    assert result['curated_products'][0]['name'] == 'Classic Stuffable Dog Toy'
+    assert result['curated_products'][0]['species'] == 'dog'
+    assert result['curated_products'][0]['category'] == 'toys'
+    assert result['curated_products'][0]['verified_amazon_product_link'] is True
     assert result['matched_inventory'][0]['title'] == 'Durable chew toy'
     amazon = result['broader_amazon_search']
     assert amazon['kind'] == 'search'
@@ -248,7 +253,9 @@ def test_open_ended_shopping_search_is_ranked_and_has_broad_amazon_fallback(api)
 def test_product_search_understands_common_pet_language(api):
     client, _ = api
     puppy = client.get('/products', params={'q': 'puppy chew toy'}).json()
-    assert puppy[0]['name'] == 'Classic Stuffable Dog Toy'
+    assert puppy[0]['species'] == 'dog'
+    assert puppy[0]['category'] == 'toys'
+    assert puppy[0]['verified_amazon_product_link'] is True
     hungry_cat = client.get('/products', params={'q': 'my kitten is hungry'}).json()
     assert hungry_cat
     assert hungry_cat[0]['species'] == 'cat'
@@ -312,7 +319,7 @@ def test_new_catalog_gaps_surface_exact_product_types(api, query, expected_fragm
     ('dog life jacket', 'dog', 'safety'),
     ('cat dental care', 'cat', 'dental'),
 ])
-def test_doubled_catalog_surfaces_diverse_exact_products(api, query, species, category):
+def test_expanded_catalog_surfaces_diverse_exact_products(api, query, species, category):
     client, _ = api
     result = client.get('/shopping-options', params={'q': query, 'limit': 3}).json()
     top = result['curated_products'][0]
@@ -324,27 +331,27 @@ def test_catalog_stats_are_honest_and_public(api):
     client, _ = api
     client.headers.pop('X-API-Key')
     stats = client.get('/catalog-stats').json()
-    assert stats['active_curated_products'] == 516
+    assert stats['active_curated_products'] == 1000
     assert stats['retired_products'] == 5
     assert stats['shopping_intents'] == 2771
-    assert stats['verified_amazon_products'] == 514
-    assert stats['affiliate_enabled_active_products'] == 516
+    assert stats['verified_amazon_products'] == 998
+    assert stats['affiliate_enabled_active_products'] == 1000
     assert stats['affiliate_enabled_intents'] == 2771
     assert stats['verified_chewy_products'] == 0
-    assert stats['species_counts']['dog'] == 117
-    assert stats['species_counts']['cat'] == 93
-    assert stats['species_counts']['fish'] == 44
-    assert stats['species_counts']['bird'] == 33
-    assert stats['species_counts']['ferret'] == 16
-    assert stats['species_counts']['hermit-crab'] == 12
-    assert stats['species_counts']['gerbil'] == 10
-    assert stats['species_counts']['mouse'] == 10
-    assert stats['species_counts']['amphibian'] == 10
-    assert stats['category_counts']['food'] == 82
-    assert stats['category_counts']['toys'] == 47
-    assert stats['category_counts']['habitat'] == 65
-    assert stats['category_counts']['supplements'] == 17
-    assert stats['category_counts']['heating-lighting'] == 25
+    assert stats['species_counts']['dog'] == 201
+    assert stats['species_counts']['cat'] == 169
+    assert stats['species_counts']['fish'] == 84
+    assert stats['species_counts']['bird'] == 68
+    assert stats['species_counts']['ferret'] == 36
+    assert stats['species_counts']['hermit-crab'] == 27
+    assert stats['species_counts']['gerbil'] == 20
+    assert stats['species_counts']['mouse'] == 19
+    assert stats['species_counts']['amphibian'] == 24
+    assert stats['category_counts']['food'] == 213
+    assert stats['category_counts']['toys'] == 79
+    assert stats['category_counts']['habitat'] == 148
+    assert stats['category_counts']['supplements'] == 45
+    assert stats['category_counts']['heating-lighting'] == 40
     assert stats['shopping_species_counts']['dog'] == 473
     assert stats['shopping_species_counts']['guinea-pig'] == 66
     assert stats['shopping_species_counts']['ferret'] == 159
@@ -390,9 +397,9 @@ def test_every_active_product_and_inventory_concept_has_affiliate_path(api):
     client, _ = api
     products = client.get('/products', params={'limit': 500}).json()
     products += client.get('/products', params={'limit': 500, 'offset': 500}).json()
-    assert len(products) == 516
+    assert len(products) == 1000
     assert all(product['amazon_link_available'] for product in products)
-    assert sum(product['verified_amazon_product_link'] for product in products) == 514
+    assert sum(product['verified_amazon_product_link'] for product in products) == 998
     assert sum(product['affiliate_search_available'] for product in products) == 2
     assert all(any(option['retailer'] == 'amazon' and option['affiliate']
                    for option in product['retailer_options']) for product in products)

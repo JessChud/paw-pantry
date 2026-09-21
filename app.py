@@ -24,6 +24,7 @@ from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 from affiliate_links import valid_chewy_link
+from semantic_search import SemanticRanker
 
 BASE_DIR = Path(__file__).parent
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR}/pawpantry.db")
@@ -35,6 +36,7 @@ connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite")
 engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
 Base = declarative_base()
+SEMANTIC_RANKER = SemanticRanker()
 
 
 # ---------------- models ----------------
@@ -181,7 +183,21 @@ class ShoppingOptionsResult(BaseModel):
     query: str
     curated_products: list[CatalogProduct]
     broader_amazon_search: RetailerOption
+    matching_method: Literal["keyword", "hybrid-semantic"]
+    semantic_model: Optional[str]
     guidance: str
+
+
+class CatalogStats(BaseModel):
+    active_curated_products: int
+    retired_products: int
+    verified_amazon_products: int
+    verified_chewy_products: int
+    species_counts: dict[str, int]
+    category_counts: dict[str, int]
+    broader_amazon_search_enabled: bool
+    semantic_search_enabled: bool
+    semantic_model: Optional[str]
 
 
 @asynccontextmanager
@@ -192,7 +208,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry API", version="0.4.0", lifespan=lifespan,
+    title="Paw Pantry API", version="0.5.0", lifespan=lifespan,
     description="Private single-owner prototype. All pet records share one API key. "
                 "Not suitable for unrelated users until user isolation is implemented. "
                 "Product search results include validated, user-initiated retailer options "
@@ -346,8 +362,14 @@ def product_search_score(product: Product, query: str) -> int:
     return score
 
 
+def product_embedding_text(product: Product) -> str:
+    return (f"Pet species: {product.species}. Supply category: {product.category}. "
+            f"Product: {product.brand} {product.name}. Package: {product.package_size}. "
+            f"Details: {product.notes}")
+
+
 def matching_products(db: Session, species: Optional[str], category: Optional[str],
-                      query_text: Optional[str], limit: int) -> list[Product]:
+                      query_text: Optional[str], limit: int) -> tuple[list[Product], str]:
     query = db.query(Product)
     retired_ids = [int(key) for key, value in catalog_metadata().items()
                    if value.get("catalog_status") == "retired"]
@@ -358,11 +380,25 @@ def matching_products(db: Session, species: Optional[str], category: Optional[st
     if category:
         query = query.filter(Product.category == category.lower())
     products = query.all()
+    method = "keyword"
     if query_text:
-        scored = [(product_search_score(product, query_text), product) for product in products]
-        products = [product for score, product in sorted(
-            scored, key=lambda pair: (-pair[0], pair[1].id)) if score > 0]
-    return products[:limit]
+        lexical = {product.id: product_search_score(product, query_text) for product in products}
+        semantic = SEMANTIC_RANKER.rank(
+            query_text, {product.id: product_embedding_text(product) for product in products})
+        if semantic:
+            method = "hybrid-semantic"
+            maximum = max(lexical.values(), default=0) or 1
+            combined = {
+                product.id: (0.35 * lexical[product.id] / maximum
+                             + 0.65 * max(0.0, semantic.get(product.id, 0.0)))
+                for product in products
+            }
+            products = sorted(products, key=lambda product: (-combined[product.id], product.id))
+        else:
+            products = [product for product in sorted(
+                products, key=lambda product: (-lexical[product.id], product.id))
+                if lexical[product.id] > 0]
+    return products[:limit], method
 
 
 def amazon_search_option(query_text: str, species: Optional[str],
@@ -612,7 +648,36 @@ def list_products(species: Optional[str] = Query(default=None, max_length=60),
     Clients may surface each `retailer_options` entry directly. They must show its
     disclosure with the button and open the URL only after the user chooses it.
     """
-    return [product_to_dict(p) for p in matching_products(db, species, category, q, limit)]
+    products, _ = matching_products(db, species, category, q, limit)
+    return [product_to_dict(p) for p in products]
+
+
+@app.get("/catalog-stats", response_model=CatalogStats)
+def catalog_stats(db: Session = Depends(get_db)):
+    """Public, non-sensitive counts describing the current connector inventory."""
+    metadata = catalog_metadata()
+    products = db.query(Product).all()
+    active = [product for product in products
+              if metadata.get(str(product.id), {}).get("catalog_status") != "retired"]
+    species_counts = {}
+    category_counts = {}
+    for product in active:
+        species_counts[product.species] = species_counts.get(product.species, 0) + 1
+        category_counts[product.category] = category_counts.get(product.category, 0) + 1
+    return {
+        "active_curated_products": len(active),
+        "retired_products": len(products) - len(active),
+        "verified_amazon_products": sum(valid_amazon_link(product.amazon_url)
+                                        for product in active),
+        "verified_chewy_products": sum(valid_chewy_link(
+            product.chewy_url, metadata.get(str(product.id), {}), chewy_program())
+            for product in active),
+        "species_counts": species_counts,
+        "category_counts": category_counts,
+        "broader_amazon_search_enabled": True,
+        "semantic_search_enabled": SEMANTIC_RANKER.enabled,
+        "semantic_model": SEMANTIC_RANKER.model if SEMANTIC_RANKER.enabled else None,
+    }
 
 
 @app.get("/shopping-options", dependencies=[Depends(require_key)],
@@ -628,11 +693,14 @@ def shopping_options(q: str = Query(min_length=2, max_length=200),
     individually verified variants. The broader Amazon action opens changing search
     results, so the client must not describe it as a specific recommendation.
     """
-    products = [product_to_dict(p) for p in matching_products(db, species, category, q, limit)]
+    matches, method = matching_products(db, species, category, q, limit)
+    products = [product_to_dict(p) for p in matches]
     return {
         "query": q,
         "curated_products": products,
         "broader_amazon_search": amazon_search_option(q, species, category),
+        "matching_method": method,
+        "semantic_model": SEMANTIC_RANKER.model if method == "hybrid-semantic" else None,
         "guidance": ("Curated matches are examples, not suitability guarantees. Amazon search "
                      "results can change. Check the current product, seller, price, ingredients "
                      "or materials, size, and suitability before buying."),

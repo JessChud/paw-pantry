@@ -42,6 +42,22 @@ the repository, browser code, or connector response.
 
 The public site also offers ten original AI-assisted planning guides and a browser-only refill calculator. It makes no hands-on product-testing claims. Calculator entries are not transmitted or saved.
 
+## Search and inventory
+
+`/catalog-stats` reports the current inventory without authentication. The current
+seed has 30 stable records: 25 active curated products, five retained retired variants,
+23 active verified Amazon product links, and no active Chewy links. The active set
+covers seven species and 14 supply categories. `/shopping-options` adds a broader
+tagged Amazon search for requests that exceed that curated set.
+
+When `OPENAI_API_KEY` is set, product search uses `text-embedding-3-small` with
+256-dimensional embeddings to combine semantic relevance with the offline keyword
+score. Catalog vectors are cached in memory; each request embeds only the query after
+the first catalog pass. If the API is unavailable or the key is absent, matching falls
+back automatically to the tested offline ranker. Optional settings are
+`OPENAI_EMBEDDING_MODEL`, `OPENAI_EMBEDDING_DIMENSIONS`, and
+`OPENAI_EMBEDDING_TIMEOUT_SECONDS`. Never commit the API key.
+
 ## Catalog maintenance
 
 `data/seed_products.json` contains stable product IDs. Startup updates those managed IDs and inserts new ones in a transaction; it preserves pets, supplies, and other product rows. Never recycle an ID for a different product. Schema changes need a separate migration plan; startup table creation does not migrate existing columns.

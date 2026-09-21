@@ -175,6 +175,8 @@ def test_open_ended_shopping_search_is_ranked_and_has_broad_amazon_fallback(api)
     client, _ = api
     result = client.get('/shopping-options', params={'q': 'durable chew toy for my puppy'}).json()
     assert result['query'] == 'durable chew toy for my puppy'
+    assert result['matching_method'] == 'keyword'
+    assert result['semantic_model'] is None
     assert result['curated_products'][0]['name'] == 'Classic Stuffable Dog Toy'
     amazon = result['broader_amazon_search']
     assert amazon['kind'] == 'search'
@@ -196,6 +198,38 @@ def test_product_search_understands_common_pet_language(api):
     assert hungry_cat[0]['category'] == 'food'
     assert client.get('/shopping-options', params={'q': 'x'}).status_code == 422
     assert client.get('/shopping-options', params={'q': 'x' * 201}).status_code == 422
+
+
+def test_catalog_stats_are_honest_and_public(api):
+    client, _ = api
+    client.headers.pop('X-API-Key')
+    stats = client.get('/catalog-stats').json()
+    assert stats['active_curated_products'] == 25
+    assert stats['retired_products'] == 5
+    assert stats['verified_amazon_products'] == 23
+    assert stats['verified_chewy_products'] == 0
+    assert stats['species_counts']['dog'] == 12
+    assert stats['species_counts']['cat'] == 8
+    assert stats['broader_amazon_search_enabled'] is True
+    assert stats['semantic_search_enabled'] is False
+    assert stats['semantic_model'] is None
+
+
+def test_semantic_ranking_can_retrieve_without_keyword_overlap(api, monkeypatch):
+    client, module = api
+
+    class FakeSemanticRanker:
+        enabled = True
+        model = 'test-small-embedding'
+
+        def rank(self, query, item_texts):
+            return {item_id: (1.0 if item_id == 17 else 0.1) for item_id in item_texts}
+
+    monkeypatch.setattr(module, 'SEMANTIC_RANKER', FakeSemanticRanker())
+    result = client.get('/shopping-options', params={'q': 'something for my aquatic friend'}).json()
+    assert result['matching_method'] == 'hybrid-semantic'
+    assert result['semantic_model'] == 'test-small-embedding'
+    assert result['curated_products'][0]['id'] == 17
 
 
 def test_default_purchase_date_and_restart_preserve_records(api):

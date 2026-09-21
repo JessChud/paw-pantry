@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Test the Paw Pantry connector</title>
+<meta name="description" content="Try a pet-supply request and inspect the response Paw Pantry prepares for Muse.">
+<style>
+:root{--ink:#1f2937;--muted:#626b7a;--teal:#0f766e;--cream:#fffbeb;--line:#eadfbe}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
+main{max-width:920px;margin:auto;padding:30px 22px 70px}nav{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:30px}a{color:#075985}
+.hero{text-align:center;margin-bottom:28px}.hero img{width:76px;height:76px;border-radius:20px}.hero h1{font-size:2rem;margin:12px 0 4px}.hero p{color:var(--muted);margin:0 auto;max-width:650px}
+form,.panel,article{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+label{display:block;font-weight:700;margin-bottom:8px}.search-row{display:flex;gap:10px}input{width:100%;min-width:0;border:1px solid #9ca3af;border-radius:10px;padding:12px;font:inherit}button,.button{display:inline-block;border:0;border-radius:999px;background:var(--teal);color:#fff;padding:11px 18px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+.status{color:var(--muted)}.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}.tag{color:#6b7280;font-size:.86rem;text-transform:capitalize}article h2{font-size:1.08rem;line-height:1.35}.disclosure{font-size:.82rem;color:var(--muted)}
+details{margin-top:26px}summary{cursor:pointer;font-weight:700}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#172033;color:#eef2ff;padding:18px;border-radius:12px;overflow:auto;font-size:.82rem}
+.note{font-size:.9rem;color:var(--muted)}@media(max-width:600px){.search-row{display:block}.search-row button{width:100%;margin-top:10px}}
+</style>
+</head>
+<body><main>
+<nav><a href="/">Paw Pantry</a><a href="/documentation">Connector documentation</a><a href="/catalog">Catalog</a></nav>
+<header class="hero"><img src="/static/icon.png" alt="Paw Pantry logo"><h1>Test the connector</h1><p>Enter a request the way you would ask Muse. This page uses the same ranking and response builder as the authenticated connector, while keeping credentials out of the browser.</p></header>
+<form method="get" action="/tester"><label for="q">What does your pet need?</label><div class="search-row"><input id="q" name="q" maxlength="200" value="{{QUERY}}" placeholder="durable chew toy for my puppy"><button type="submit">Test search</button></div></form>
+<div class="panel status">{{STATUS}}<p class="note">Retailer links open only if you click them. Paw Pantry does not place orders.</p></div>
+<section class="grid">{{RESULTS}}</section>
+<details><summary>See the JSON Muse receives</summary><pre>{{JSON}}</pre></details>
+</main></body></html>

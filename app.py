@@ -276,7 +276,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry Connector API", version="0.12.0", lifespan=lifespan,
+    title="Paw Pantry Connector API", version="0.13.0", lifespan=lifespan,
     description="Stateless pet-supply search and refill estimates for Muse. "
                 "The connector cannot read or write Paw Pantry's private pet workspace. "
                 "Retailer actions open only after the user chooses them, and the supplied "
@@ -1121,6 +1121,53 @@ def shopping_options(q: str = Query(min_length=2, max_length=200),
     }
 
 
+@app.get("/tester", response_class=HTMLResponse, include_in_schema=False)
+def connector_tester(q: str = Query(default="", max_length=200),
+                     db: Session = Depends(get_db)):
+    """Human-friendly preview of the connector's real search and response builder."""
+    query = q.strip()
+    result = None
+    if len(query) >= 2:
+        result = shopping_options(q=query, species=None, category=None, limit=5, db=db)
+
+    cards = []
+    if result:
+        for product in result["curated_products"]:
+            amazon = next(
+                (option for option in product["retailer_options"]
+                 if option["retailer"] == "amazon"), None)
+            action = ""
+            if amazon:
+                action = (
+                    f'<p><a class="button" rel="{escape(amazon["rel"], quote=True)}" '
+                    f'href="{escape(amazon["url"], quote=True)}">'
+                    f'{escape(amazon["button_label"])}</a></p>'
+                    f'<p class="disclosure">{escape(amazon["disclosure"])}</p>'
+                )
+            cards.append(
+                f'<article><p class="tag">{escape(product["species"].replace("-", " ").title())}'
+                f' · {escape(product["category"].replace("-", " ").title())}</p>'
+                f'<h2>{escape(product["name"])}</h2>'
+                f'<p>{escape(product["notes"])}</p>{action}</article>'
+            )
+
+    page = (BASE_DIR / "static" / "tester.html").read_text()
+    replacements = {
+        "{{QUERY}}": escape(query, quote=True),
+        "{{STATUS}}": (
+            f'<p><strong>{len(result["curated_products"])} curated matches</strong> '
+            f'using the {escape(result["matching_method"])} matcher.</p>'
+            if result else
+            '<p>Try a request such as “durable chew toy for my puppy.”</p>'
+        ),
+        "{{RESULTS}}": "".join(cards),
+        "{{JSON}}": escape(json.dumps(result, indent=2, ensure_ascii=False)) if result else "",
+    }
+    return re.sub(
+        r"\{\{(?:QUERY|STATUS|RESULTS|JSON)\}\}",
+        lambda match: replacements[match.group()], page)
+
+
 @app.get(
     "/products/{product_id}/link",
     dependencies=[Depends(require_connector_key)],
@@ -1233,7 +1280,7 @@ def muse_openapi():
     ]
     schema = get_openapi(
         title="Paw Pantry Connector API",
-        version="0.12.0",
+        version="0.13.0",
         description=("Stateless pet-supply search and refill estimates for Muse. "
                      "This contract cannot access Paw Pantry's private pet-profile workspace. "
                      "Inventory matches include a first-party Paw Pantry guidance page and a "

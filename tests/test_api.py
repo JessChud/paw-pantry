@@ -32,6 +32,16 @@ def supply_payload(**overrides):
             'last_purchased': date.today().isoformat(), **overrides}
 
 
+def all_products(client):
+    rows = []
+    for offset in range(0, 10001, 500):
+        page = client.get('/products', params={'limit': 500, 'offset': offset}).json()
+        rows.extend(page)
+        if len(page) < 500:
+            return rows
+    return rows
+
+
 def test_auth_and_schema(api):
     client, _ = api
     assert client.get('/pets', headers={'X-API-Key': ''}).status_code == 401
@@ -176,12 +186,12 @@ def test_catalog_upsert_preserves_profile_and_supply(api, tmp_path, monkeypatch)
     rows[0]['notes'] = 'Updated catalog content'
     (tmp_path / 'data').mkdir()
     (tmp_path / 'data/seed_products.json').write_text(json.dumps(rows))
+    (tmp_path / 'data/catalog_sources.json').write_text(json.dumps(sources))
     monkeypatch.setattr(module, 'BASE_DIR', tmp_path)
     module.seed()
     module.seed()
     assert client.get('/products').json()[0]['notes'] == 'Updated catalog content'
-    products = client.get('/products', params={'limit': 500}).json()
-    products += client.get('/products', params={'limit': 500, 'offset': 500}).json()
+    products = all_products(client)
     assert len(products) == active_count
     assert client.get(f'/pets/{pet_id}').status_code == 200
     assert len(client.get(f'/pets/{pet_id}/supplies').json()) == 1
@@ -264,6 +274,22 @@ def test_product_search_understands_common_pet_language(api):
     assert client.get('/shopping-options', params={'q': 'x' * 201}).status_code == 422
 
 
+def test_public_connector_tester_uses_real_results_without_exposing_credentials(api):
+    client, _ = api
+    client.headers.pop('X-API-Key')
+    empty = client.get('/tester')
+    assert empty.status_code == 200
+    assert 'Test the connector' in empty.text
+    response = client.get('/tester', params={'q': 'durable chew toy for my puppy'})
+    assert response.status_code == 200
+    assert 'curated matches' in response.text
+    assert '&quot;curated_products&quot;' in response.text
+    assert 'tag=pawpantry-20' in response.text
+    assert 'As an Amazon Associate I earn from qualifying purchases.' in response.text
+    assert 'test-muse-secret' not in response.text
+    assert '/tester' not in client.get('/openapi.json').json()['paths']
+
+
 @pytest.mark.parametrize(('query', 'expected_product_species', 'expected_intent'), [
     ('terrarium substrate for leopard gecko', 'reptile', 'Reptile substrate'),
     ('hay for my rabbit', 'rabbit', 'Timothy hay'),
@@ -331,27 +357,27 @@ def test_catalog_stats_are_honest_and_public(api):
     client, _ = api
     client.headers.pop('X-API-Key')
     stats = client.get('/catalog-stats').json()
-    assert stats['active_curated_products'] == 1000
+    assert stats['active_curated_products'] == 2000
     assert stats['retired_products'] == 5
     assert stats['shopping_intents'] == 2771
-    assert stats['verified_amazon_products'] == 998
-    assert stats['affiliate_enabled_active_products'] == 1000
+    assert stats['verified_amazon_products'] == 1998
+    assert stats['affiliate_enabled_active_products'] == 2000
     assert stats['affiliate_enabled_intents'] == 2771
     assert stats['verified_chewy_products'] == 0
-    assert stats['species_counts']['dog'] == 201
-    assert stats['species_counts']['cat'] == 169
-    assert stats['species_counts']['fish'] == 84
-    assert stats['species_counts']['bird'] == 68
-    assert stats['species_counts']['ferret'] == 36
-    assert stats['species_counts']['hermit-crab'] == 27
-    assert stats['species_counts']['gerbil'] == 20
-    assert stats['species_counts']['mouse'] == 19
-    assert stats['species_counts']['amphibian'] == 24
-    assert stats['category_counts']['food'] == 213
-    assert stats['category_counts']['toys'] == 79
-    assert stats['category_counts']['habitat'] == 148
-    assert stats['category_counts']['supplements'] == 45
-    assert stats['category_counts']['heating-lighting'] == 40
+    assert stats['species_counts']['dog'] == 388
+    assert stats['species_counts']['cat'] == 329
+    assert stats['species_counts']['fish'] == 164
+    assert stats['species_counts']['bird'] == 138
+    assert stats['species_counts']['ferret'] == 76
+    assert stats['species_counts']['hermit-crab'] == 57
+    assert stats['species_counts']['gerbil'] == 43
+    assert stats['species_counts']['mouse'] == 49
+    assert stats['species_counts']['amphibian'] == 44
+    assert stats['category_counts']['food'] == 460
+    assert stats['category_counts']['toys'] == 150
+    assert stats['category_counts']['habitat'] == 330
+    assert stats['category_counts']['supplements'] == 98
+    assert stats['category_counts']['heating-lighting'] == 66
     assert stats['shopping_species_counts']['dog'] == 473
     assert stats['shopping_species_counts']['guinea-pig'] == 66
     assert stats['shopping_species_counts']['ferret'] == 159
@@ -395,11 +421,10 @@ def test_inventory_is_product_type_coverage_not_fake_retail_stock(api):
 
 def test_every_active_product_and_inventory_concept_has_affiliate_path(api):
     client, _ = api
-    products = client.get('/products', params={'limit': 500}).json()
-    products += client.get('/products', params={'limit': 500, 'offset': 500}).json()
-    assert len(products) == 1000
+    products = all_products(client)
+    assert len(products) == 2000
     assert all(product['amazon_link_available'] for product in products)
-    assert sum(product['verified_amazon_product_link'] for product in products) == 998
+    assert sum(product['verified_amazon_product_link'] for product in products) == 1998
     assert sum(product['affiliate_search_available'] for product in products) == 2
     assert all(any(option['retailer'] == 'amazon' and option['affiliate']
                    for option in product['retailer_options']) for product in products)

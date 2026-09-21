@@ -15,7 +15,9 @@ The Muse submission is under review. The API uses one shared owner key: it does 
 Supported examples:
 
 - Create or update a pet profile, including allergies and weight.
-- Search the starter catalog by species, category, or keyword.
+- Search the starter catalog by species, category, or keyword. Each result includes
+  validated `retailer_options` that Muse can render as direct external buttons with
+  the supplied affiliate disclosure.
 - Track a purchased supply using a purchase date, package amount, daily use, and matching unit.
 - Ask how many days remain and when to consider reordering.
 - Inspect, replace, or delete an existing tracked supply.
@@ -29,11 +31,11 @@ The public site also offers ten original AI-assisted planning guides and a brows
 
 `data/seed_products.json` contains stable product IDs. Startup updates those managed IDs and inserts new ones in a transaction; it preserves pets, supplies, and other product rows. Never recycle an ID for a different product. Schema changes need a separate migration plan; startup table creation does not migrate existing columns.
 
-`data/catalog_sources.json` records checked manufacturer pages, Amazon ASINs, checked variants, and link provenance. Five older package/variant records are retired from browsing and search but retained in the database for existing supplies; their alternatives have new IDs. 23 Amazon purchase links are currently configured. Two current entries still lack verified Amazon matches, and Chewy approval is pending. Missing links return 409 rather than a placeholder. Use only verified product ASINs with Amazon’s documented simple text link format; do not guess product IDs or advertise approval that has not been received. Confirm Amazon permits the intended Muse placement before enabling affiliate links inside conversations; a website listing does not establish that permission.
+`data/catalog_sources.json` records checked manufacturer pages, Amazon ASINs, checked variants, and link provenance. Five older package/variant records are retired from browsing and search but retained in the database for existing supplies; their alternatives have new IDs. 23 Amazon purchase links are currently configured. Two current entries still lack verified Amazon matches, and Chewy approval is pending. Missing links return 409 rather than a placeholder. Use only verified product ASINs with Amazon’s documented simple text link format; do not guess product IDs or advertise approval that has not been received.
 
 ## Affiliate link maintenance
 
-Run `python scripts/check_affiliate_links.py` before publishing. It checks Amazon links against their recorded ASIN and the required `pawpantry-20` tag, and Chewy links against approval and dated verification records without opening affiliate URLs or generating clicks. Verify the current product page and variant separately when adding an ASIN. Amazon’s Link Checker confirmed a sample of the documented format tags to this account. SiteStripe copying is not required. The API also rejects Amazon links with an incorrect tag and supplies a public catalog URL for each item. Use the public website as the shopping destination while Muse placement permission is unresolved.
+Run `python scripts/check_affiliate_links.py` before publishing. It checks Amazon links against their recorded ASIN and the required `pawpantry-20` tag, and Chewy links against approval and dated verification records without opening affiliate URLs or generating clicks. Verify the current product page and variant separately when adding an ASIN. Amazon’s Link Checker confirmed a sample of the documented format tags to this account. SiteStripe copying is not required. The API also rejects Amazon links with an incorrect tag. Product search responses expose only validated links in `retailer_options`; each option includes `button_label`, `url`, `disclosure`, `affiliate`, `opens_after_user_click`, and `rel` so Muse can display it without a second API call. Muse must show the supplied disclosure beside the action and must never open a retailer or initiate a purchase without the user's click.
 
 ## Tests and deployment
 

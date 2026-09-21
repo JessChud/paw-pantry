@@ -144,7 +144,31 @@ def test_link_validation_and_disclosure(api):
         db.get(module.Product, 1).amazon_url = 'https://www.amazon.com/dp/B09K8YYVWV?tag=pawpantry-20'
     response = client.get('/products/1/link').json()
     assert response['destination'] == 'Amazon'
+    assert response['button_label'] == 'Check on Amazon'
+    assert response['affiliate'] is True
+    assert response['opens_after_user_click'] is True
+    assert response['rel'] == 'sponsored nofollow noopener'
     assert 'As an Amazon Associate I earn from qualifying purchases.' in response['disclosure']
+
+
+def test_product_search_returns_display_ready_amazon_option(api):
+    client, _ = api
+    product = client.get('/products', params={'q': 'Blue Buffalo'}).json()[0]
+    amazon = next(option for option in product['retailer_options']
+                  if option['retailer'] == 'amazon')
+    assert product['amazon_link_available'] is True
+    assert amazon['destination'] == 'Amazon'
+    assert amazon['button_label'] == 'Check on Amazon'
+    assert amazon['url'].startswith('https://www.amazon.com/')
+    assert 'tag=pawpantry-20' in amazon['url']
+    assert amazon['affiliate'] is True
+    assert amazon['opens_after_user_click'] is True
+    assert amazon['rel'] == 'sponsored nofollow noopener'
+    assert 'As an Amazon Associate I earn from qualifying purchases.' in amazon['disclosure']
+
+    schema = client.get('/openapi.json').json()
+    product_schema = schema['components']['schemas']['CatalogProduct']
+    assert 'retailer_options' in product_schema['properties']
 
 
 def test_default_purchase_date_and_restart_preserve_records(api):
@@ -186,6 +210,9 @@ def test_wrong_tracking_tag_is_not_published(api):
     with module.SessionLocal.begin() as db:
         db.get(module.Product, 1).amazon_url = 'https://www.amazon.com/dp/B09K8YYVWV?tag=wrong-owner-20'
     assert client.get('/products/1/link').status_code == 409
+    product = next(row for row in client.get('/products').json() if row['id'] == 1)
+    assert product['amazon_link_available'] is False
+    assert all(option['retailer'] != 'amazon' for option in product['retailer_options'])
     assert 'wrong-owner-20' not in client.get('/catalog').text
 
 
@@ -202,6 +229,7 @@ def test_retired_variants_keep_supply_history(api):
     assert tracked['website_url'] is None
     assert tracked['amazon_link_available'] is False
     assert tracked['chewy_link_available'] is False
+    assert tracked['retailer_options'] == []
 
 
 def reviewed_chewy_fixture(module, monkeypatch):
@@ -246,6 +274,10 @@ def test_verified_chewy_link_is_consistent_in_api_and_catalog(api, monkeypatch):
     assert 'commission' in response.json()['disclosure']
     assert 'Amazon Associate' not in response.json()['disclosure']
     assert response.json()['product']['chewy_link_available'] is True
+    chewy = next(option for option in response.json()['product']['retailer_options']
+                 if option['retailer'] == 'chewy')
+    assert chewy['url'] == url
+    assert chewy['button_label'] == 'Check on Chewy'
     page = client.get('/catalog').text
     assert 'Check on Chewy' in page
     assert 'Affiliate link — Paw Pantry may earn a commission.' in page

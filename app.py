@@ -135,6 +135,47 @@ class SupplyCreate(InputModel):
         return self
 
 
+class RetailerOption(BaseModel):
+    """A user-initiated external retailer action that a connector may render."""
+
+    retailer: Literal["amazon", "chewy"]
+    destination: str
+    button_label: str
+    url: str
+    disclosure: str
+    affiliate: bool = True
+    opens_after_user_click: bool = True
+    rel: str = "sponsored nofollow noopener"
+
+
+class CatalogProduct(BaseModel):
+    id: int
+    name: str
+    brand: str
+    species: str
+    category: str
+    package_size: str
+    notes: str
+    website_url: Optional[str]
+    catalog_status: Literal["active", "retired"]
+    replacement_product_id: Optional[int]
+    amazon_link_available: bool
+    chewy_link_available: bool
+    retailer_options: list[RetailerOption]
+
+
+class ProductLinkResult(BaseModel):
+    product: CatalogProduct
+    retailer: Literal["amazon", "chewy"]
+    destination: str
+    button_label: str
+    url: str
+    disclosure: str
+    affiliate: bool = True
+    opens_after_user_click: bool = True
+    rel: str = "sponsored nofollow noopener"
+
+
 @asynccontextmanager
 async def lifespan(application):
     seed()
@@ -143,9 +184,11 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry API", version="0.2.0", lifespan=lifespan,
+    title="Paw Pantry API", version="0.3.0", lifespan=lifespan,
     description="Private single-owner prototype. All pet records share one API key. "
                 "Not suitable for unrelated users until user isolation is implemented. "
+                "Product search results include validated, user-initiated retailer options "
+                "that clients may render with the supplied affiliate disclosure. "
                 "Supply dates are estimates; no scheduled reminders or purchases are made."
 )
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
@@ -186,14 +229,51 @@ def valid_amazon_link(url):
             and parse_qs(parsed.query).get("tag") == ["pawpantry-20"])
 
 
+DISCLOSURE = ("Paw Pantry may earn a commission if you buy through this link, "
+              "at no extra cost to you.")
+AMAZON_DISCLOSURE = DISCLOSURE + " As an Amazon Associate I earn from qualifying purchases."
+
+
 def chewy_program():
     path = BASE_DIR / "data" / "chewy_program.json"
     return json.loads(path.read_text()) if path.exists() else {}
 
 
+def retailer_options(p: Product, metadata: Optional[dict] = None) -> list[dict]:
+    """Return only verified links, including everything a connector must display."""
+    metadata = metadata if metadata is not None else catalog_metadata().get(str(p.id), {})
+    if metadata.get("catalog_status") == "retired":
+        return []
+    options = []
+    if valid_amazon_link(p.amazon_url):
+        options.append({
+            "retailer": "amazon",
+            "destination": "Amazon",
+            "button_label": "Check on Amazon",
+            "url": p.amazon_url,
+            "disclosure": AMAZON_DISCLOSURE,
+            "affiliate": True,
+            "opens_after_user_click": True,
+            "rel": "sponsored nofollow noopener",
+        })
+    if valid_chewy_link(p.chewy_url, metadata, chewy_program()):
+        options.append({
+            "retailer": "chewy",
+            "destination": "Chewy",
+            "button_label": "Check on Chewy",
+            "url": p.chewy_url,
+            "disclosure": DISCLOSURE,
+            "affiliate": True,
+            "opens_after_user_click": True,
+            "rel": "sponsored nofollow noopener",
+        })
+    return options
+
+
 def product_to_dict(p: Product) -> dict:
     metadata = catalog_metadata().get(str(p.id), {})
     retired = metadata.get("catalog_status") == "retired"
+    options = retailer_options(p, metadata)
     return {
         "id": p.id, "name": p.name, "brand": p.brand,
         "species": p.species, "category": p.category,
@@ -201,8 +281,9 @@ def product_to_dict(p: Product) -> dict:
         "website_url": None if retired else f"https://paw-pantry.onrender.com/catalog#product-{p.id}",
         "catalog_status": "retired" if retired else "active",
         "replacement_product_id": metadata.get("replacement_product_id"),
-        "amazon_link_available": not retired and valid_amazon_link(p.amazon_url),
-        "chewy_link_available": valid_chewy_link(p.chewy_url, metadata, chewy_program()),
+        "amazon_link_available": any(option["retailer"] == "amazon" for option in options),
+        "chewy_link_available": any(option["retailer"] == "chewy" for option in options),
+        "retailer_options": options,
     }
 
 
@@ -416,9 +497,14 @@ def runout(pet_id: int, db: Session = Depends(get_db)):
 
 
 # ---- catalog ----
-@app.get("/products", dependencies=[Depends(require_key)])
+@app.get("/products", dependencies=[Depends(require_key)], response_model=list[CatalogProduct])
 def list_products(species: Optional[str] = None, category: Optional[str] = None,
                   q: Optional[str] = Query(default=None, max_length=200), db: Session = Depends(get_db)):
+    """Search products and return display-ready retailer buttons and disclosures.
+
+    Clients may surface each `retailer_options` entry directly. They must show its
+    disclosure with the button and open the URL only after the user chooses it.
+    """
     query = db.query(Product)
     retired_ids = [int(key) for key, value in catalog_metadata().items()
                    if value.get("catalog_status") == "retired"]
@@ -435,13 +521,10 @@ def list_products(species: Optional[str] = None, category: Optional[str] = None,
     return [product_to_dict(p) for p in query.all()]
 
 
-DISCLOSURE = ("Paw Pantry may earn a commission if you buy through this link, "
-              "at no extra cost to you.")
-
-
-@app.get("/products/{product_id}/link", dependencies=[Depends(require_key)])
+@app.get("/products/{product_id}/link", dependencies=[Depends(require_key)],
+         response_model=ProductLinkResult)
 def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon", db: Session = Depends(get_db)):
-    """Affiliate purchase link + required disclosure text."""
+    """Return one display-ready, user-initiated affiliate retailer action."""
     p = db.get(Product, product_id)
     if not p:
         raise HTTPException(404, "product not found")
@@ -453,9 +536,12 @@ def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon
         raise HTTPException(409, "verified Chewy affiliate link not available for this product yet")
     if retailer == "amazon" and not valid_amazon_link(url):
         raise HTTPException(409, "affiliate tracking tag is not configured correctly")
+    destination = "Amazon" if retailer == "amazon" else "Chewy"
     return {"product": product_to_dict(p), "retailer": retailer,
-            "url": url, "disclosure": DISCLOSURE + (" As an Amazon Associate I earn from qualifying purchases." if retailer == "amazon" else ""),
-            "destination": "Amazon" if retailer == "amazon" else "Chewy"}
+            "url": url, "disclosure": AMAZON_DISCLOSURE if retailer == "amazon" else DISCLOSURE,
+            "destination": destination, "button_label": f"Check on {destination}",
+            "affiliate": True, "opens_after_user_click": True,
+            "rel": "sponsored nofollow noopener"}
 
 
 # The private owner can inspect, correct, or retire a tracked supply.

@@ -171,6 +171,33 @@ def test_product_search_returns_display_ready_amazon_option(api):
     assert 'retailer_options' in product_schema['properties']
 
 
+def test_open_ended_shopping_search_is_ranked_and_has_broad_amazon_fallback(api):
+    client, _ = api
+    result = client.get('/shopping-options', params={'q': 'durable chew toy for my puppy'}).json()
+    assert result['query'] == 'durable chew toy for my puppy'
+    assert result['curated_products'][0]['name'] == 'Classic Stuffable Dog Toy'
+    amazon = result['broader_amazon_search']
+    assert amazon['kind'] == 'search'
+    assert amazon['button_label'] == 'See more options on Amazon'
+    assert amazon['affiliate'] is True
+    assert amazon['opens_after_user_click'] is True
+    assert 'tag=pawpantry-20' in amazon['url']
+    assert 'field-keywords=durable+chew+toy+for+my+puppy+pet+supplies' in amazon['url']
+    assert 'As an Amazon Associate I earn from qualifying purchases.' in amazon['disclosure']
+
+
+def test_product_search_understands_common_pet_language(api):
+    client, _ = api
+    puppy = client.get('/products', params={'q': 'puppy chew toy'}).json()
+    assert puppy[0]['name'] == 'Classic Stuffable Dog Toy'
+    hungry_cat = client.get('/products', params={'q': 'my kitten is hungry'}).json()
+    assert hungry_cat
+    assert hungry_cat[0]['species'] == 'cat'
+    assert hungry_cat[0]['category'] == 'food'
+    assert client.get('/shopping-options', params={'q': 'x'}).status_code == 422
+    assert client.get('/shopping-options', params={'q': 'x' * 201}).status_code == 422
+
+
 def test_default_purchase_date_and_restart_preserve_records(api):
     client, module = api
     pet_id = pet(client)

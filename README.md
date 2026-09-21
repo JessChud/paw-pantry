@@ -18,12 +18,27 @@ Supported examples:
 - Search the starter catalog by species, category, or keyword. Each result includes
   validated `retailer_options` that Muse can render as direct external buttons with
   the supplied affiliate disclosure.
+- Handle open-ended requests through `/shopping-options`. It returns ranked curated
+  matches plus a tagged Amazon search-results action for broader choice. The search
+  action is clearly identified as changing retailer results rather than a verified
+  individual product recommendation.
 - Track a purchased supply using a purchase date, package amount, daily use, and matching unit.
 - Ask how many days remain and when to consider reordering.
 - Inspect, replace, or delete an existing tracked supply.
 - Get an available retailer link with its disclosure, without placing an order.
 
 There are no scheduled reminders, automatic orders, checkout, delivery tracking, live prices, veterinary recommendations, or automatic ingredient/allergy filtering. An allergy recorded in a profile does not certify any product as suitable. Reorder dates are estimates, including past dates for overdue supplies. Check actual supplies and the current label.
+
+The checked local catalog is deliberately smaller than Amazon's catalog. Paw Pantry
+uses a broad Amazon pet-supply search action for long-tail shopping requests. The
+Amazon Associates Link Checker validated a representative generated search URL as
+tagging to this account. The
+intended next phase is Amazon's Creators API `SearchItems` operation, which can return
+live product records and vended affiliate URLs. The account's Creators API page
+currently requires an approved Associates account and says Product Advertising access
+also requires at least 10 qualifying sales within the past 30 days. Creators API
+credentials must stay in Render environment variables; they must never be placed in
+the repository, browser code, or connector response.
 
 The public site also offers ten original AI-assisted planning guides and a browser-only refill calculator. It makes no hands-on product-testing claims. Calculator entries are not transmitted or saved.
 

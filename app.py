@@ -11,7 +11,7 @@ from datetime import date, timedelta
 from hmac import compare_digest
 from html import escape
 from math import ceil
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -143,6 +143,7 @@ class RetailerOption(BaseModel):
     button_label: str
     url: str
     disclosure: str
+    kind: Literal["product", "search"] = "product"
     affiliate: bool = True
     opens_after_user_click: bool = True
     rel: str = "sponsored nofollow noopener"
@@ -176,6 +177,13 @@ class ProductLinkResult(BaseModel):
     rel: str = "sponsored nofollow noopener"
 
 
+class ShoppingOptionsResult(BaseModel):
+    query: str
+    curated_products: list[CatalogProduct]
+    broader_amazon_search: RetailerOption
+    guidance: str
+
+
 @asynccontextmanager
 async def lifespan(application):
     seed()
@@ -184,7 +192,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry API", version="0.3.0", lifespan=lifespan,
+    title="Paw Pantry API", version="0.4.0", lifespan=lifespan,
     description="Private single-owner prototype. All pet records share one API key. "
                 "Not suitable for unrelated users until user isolation is implemented. "
                 "Product search results include validated, user-initiated retailer options "
@@ -252,6 +260,7 @@ def retailer_options(p: Product, metadata: Optional[dict] = None) -> list[dict]:
             "button_label": "Check on Amazon",
             "url": p.amazon_url,
             "disclosure": AMAZON_DISCLOSURE,
+            "kind": "product",
             "affiliate": True,
             "opens_after_user_click": True,
             "rel": "sponsored nofollow noopener",
@@ -263,6 +272,7 @@ def retailer_options(p: Product, metadata: Optional[dict] = None) -> list[dict]:
             "button_label": "Check on Chewy",
             "url": p.chewy_url,
             "disclosure": DISCLOSURE,
+            "kind": "product",
             "affiliate": True,
             "opens_after_user_click": True,
             "rel": "sponsored nofollow noopener",
@@ -284,6 +294,101 @@ def product_to_dict(p: Product) -> dict:
         "amazon_link_available": any(option["retailer"] == "amazon" for option in options),
         "chewy_link_available": any(option["retailer"] == "chewy" for option in options),
         "retailer_options": options,
+    }
+
+
+SEARCH_ALIASES = {
+    "puppy": ("dog",), "puppies": ("dog",),
+    "kitten": ("cat",), "kittens": ("cat",),
+    "bunny": ("rabbit",), "bunnies": ("rabbit",),
+    "parakeet": ("bird",), "cockatiel": ("bird",),
+    "aquarium": ("fish", "habitat"), "tank": ("fish", "habitat"),
+    "feed": ("food",), "hungry": ("food",), "kibble": ("food",),
+    "snack": ("treats",), "snacks": ("treats",), "training": ("treats",),
+    "chew": ("toys",), "chewer": ("toys",), "play": ("toys",),
+    "scratch": ("toys",), "scratching": ("toys",),
+    "poop": ("supplies", "waste", "bags"), "waste": ("supplies", "bags"),
+    "bath": ("grooming",), "shampoo": ("grooming",), "brush": ("grooming",),
+    "comb": ("grooming", "flea-tick"),
+    "bed": ("beds",), "mat": ("beds",),
+    "crate": ("carriers",), "carrier": ("carriers",),
+    "leash": ("leashes",), "harness": ("leashes",), "collar": ("leashes",),
+    "flea": ("flea-tick",), "tick": ("flea-tick",),
+    "bowl": ("feeding",), "fountain": ("feeding",),
+    "stain": ("cleaning",), "odor": ("cleaning",),
+}
+SEARCH_STOPWORDS = {"a", "an", "and", "for", "i", "is", "me", "my", "of", "on",
+                    "please", "the", "to", "what", "with"}
+
+
+def search_tokens(value: str) -> list[str]:
+    return [token for token in re.findall(r"[a-z0-9]+", value.lower())
+            if token not in SEARCH_STOPWORDS]
+
+
+def product_search_score(product: Product, query: str) -> int:
+    """Rank forgiving keyword matches without making suitability claims."""
+    requested = search_tokens(query)
+    if not requested:
+        return 1
+    text = " ".join((product.name, product.brand, product.species, product.category,
+                     product.package_size, product.notes)).lower()
+    available = set(search_tokens(text))
+    score = 20 if query.strip().lower() in text else 0
+    for token in requested:
+        if token in available:
+            score += 6
+        elif any(token in word or word in token for word in available):
+            score += 2
+        for alias in SEARCH_ALIASES.get(token, ()):
+            if alias in available or alias in text:
+                score += 4
+    return score
+
+
+def matching_products(db: Session, species: Optional[str], category: Optional[str],
+                      query_text: Optional[str], limit: int) -> list[Product]:
+    query = db.query(Product)
+    retired_ids = [int(key) for key, value in catalog_metadata().items()
+                   if value.get("catalog_status") == "retired"]
+    if retired_ids:
+        query = query.filter(Product.id.notin_(retired_ids))
+    if species:
+        query = query.filter(Product.species.in_([species.lower(), "any"]))
+    if category:
+        query = query.filter(Product.category == category.lower())
+    products = query.all()
+    if query_text:
+        scored = [(product_search_score(product, query_text), product) for product in products]
+        products = [product for score, product in sorted(
+            scored, key=lambda pair: (-pair[0], pair[1].id)) if score > 0]
+    return products[:limit]
+
+
+def amazon_search_option(query_text: str, species: Optional[str],
+                         category: Optional[str]) -> dict:
+    terms = [query_text.strip()]
+    lowered = query_text.lower()
+    for value in (species, category):
+        if value and value.lower() not in lowered:
+            terms.append(value.lower())
+    terms.append("pet supplies")
+    url = "https://www.amazon.com/s/?" + urlencode({
+        "field-keywords": " ".join(terms),
+        "search-alias": "aps",
+        "tag": "pawpantry-20",
+        "linkCode": "osi",
+    })
+    return {
+        "retailer": "amazon",
+        "destination": "Amazon",
+        "button_label": "See more options on Amazon",
+        "url": url,
+        "disclosure": AMAZON_DISCLOSURE,
+        "kind": "search",
+        "affiliate": True,
+        "opens_after_user_click": True,
+        "rel": "sponsored nofollow noopener",
     }
 
 
@@ -498,27 +603,40 @@ def runout(pet_id: int, db: Session = Depends(get_db)):
 
 # ---- catalog ----
 @app.get("/products", dependencies=[Depends(require_key)], response_model=list[CatalogProduct])
-def list_products(species: Optional[str] = None, category: Optional[str] = None,
-                  q: Optional[str] = Query(default=None, max_length=200), db: Session = Depends(get_db)):
+def list_products(species: Optional[str] = Query(default=None, max_length=60),
+                  category: Optional[str] = Query(default=None, max_length=60),
+                  q: Optional[str] = Query(default=None, max_length=200),
+                  limit: int = Query(default=50, ge=1, le=50), db: Session = Depends(get_db)):
     """Search products and return display-ready retailer buttons and disclosures.
 
     Clients may surface each `retailer_options` entry directly. They must show its
     disclosure with the button and open the URL only after the user chooses it.
     """
-    query = db.query(Product)
-    retired_ids = [int(key) for key, value in catalog_metadata().items()
-                   if value.get("catalog_status") == "retired"]
-    if retired_ids:
-        query = query.filter(Product.id.notin_(retired_ids))
-    if species:
-        query = query.filter(Product.species.in_([species.lower(), "any"]))
-    if category:
-        query = query.filter(Product.category == category.lower())
-    if q:
-        like = f"%{q}%"
-        query = query.filter(Product.name.ilike(like) | Product.brand.ilike(like) |
-                             Product.category.ilike(like) | Product.notes.ilike(like))
-    return [product_to_dict(p) for p in query.all()]
+    return [product_to_dict(p) for p in matching_products(db, species, category, q, limit)]
+
+
+@app.get("/shopping-options", dependencies=[Depends(require_key)],
+         response_model=ShoppingOptionsResult)
+def shopping_options(q: str = Query(min_length=2, max_length=200),
+                     species: Optional[str] = Query(default=None, max_length=60),
+                     category: Optional[str] = Query(default=None, max_length=60),
+                     limit: int = Query(default=5, ge=1, le=10),
+                     db: Session = Depends(get_db)):
+    """Return ranked catalog matches plus a broader, user-initiated Amazon search.
+
+    Use this operation for open-ended shopping requests. Curated products have
+    individually verified variants. The broader Amazon action opens changing search
+    results, so the client must not describe it as a specific recommendation.
+    """
+    products = [product_to_dict(p) for p in matching_products(db, species, category, q, limit)]
+    return {
+        "query": q,
+        "curated_products": products,
+        "broader_amazon_search": amazon_search_option(q, species, category),
+        "guidance": ("Curated matches are examples, not suitability guarantees. Amazon search "
+                     "results can change. Check the current product, seller, price, ingredients "
+                     "or materials, size, and suitability before buying."),
+    }
 
 
 @app.get("/products/{product_id}/link", dependencies=[Depends(require_key)],

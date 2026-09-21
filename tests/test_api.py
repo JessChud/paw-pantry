@@ -177,7 +177,9 @@ def test_catalog_upsert_preserves_profile_and_supply(api, tmp_path, monkeypatch)
     module.seed()
     module.seed()
     assert client.get('/products').json()[0]['notes'] == 'Updated catalog content'
-    assert len(client.get('/products', params={'limit': 500}).json()) == len(rows)
+    products = client.get('/products', params={'limit': 500}).json()
+    products += client.get('/products', params={'limit': 500, 'offset': 500}).json()
+    assert len(products) == len(rows)
     assert client.get(f'/pets/{pet_id}').status_code == 200
     assert len(client.get(f'/pets/{pet_id}/supplies').json()) == 1
 
@@ -299,6 +301,16 @@ def test_new_catalog_gaps_surface_exact_product_types(api, query, expected_fragm
     ('snake hide cave', 'snake', 'habitat'),
     ('bearded dragon food', 'lizard', 'food'),
     ('rat enrichment toy', 'rat', 'toys'),
+    ('gerbil food', 'gerbil', 'food'),
+    ('mouse habitat', 'mouse', 'habitat'),
+    ('frog food', 'amphibian', 'food'),
+    ('dog joint supplement', 'dog', 'supplements'),
+    ('cat tree', 'cat', 'furniture'),
+    ('aquarium filter', 'fish', 'maintenance'),
+    ('reptile UVB lamp', 'reptile', 'heating-lighting'),
+    ('puppy training pads', 'dog', 'training'),
+    ('dog life jacket', 'dog', 'safety'),
+    ('cat dental care', 'cat', 'dental'),
 ])
 def test_doubled_catalog_surfaces_diverse_exact_products(api, query, species, category):
     client, _ = api
@@ -312,22 +324,27 @@ def test_catalog_stats_are_honest_and_public(api):
     client, _ = api
     client.headers.pop('X-API-Key')
     stats = client.get('/catalog-stats').json()
-    assert stats['active_curated_products'] == 258
+    assert stats['active_curated_products'] == 516
     assert stats['retired_products'] == 5
     assert stats['shopping_intents'] == 2771
-    assert stats['verified_amazon_products'] == 256
-    assert stats['affiliate_enabled_active_products'] == 258
+    assert stats['verified_amazon_products'] == 514
+    assert stats['affiliate_enabled_active_products'] == 516
     assert stats['affiliate_enabled_intents'] == 2771
     assert stats['verified_chewy_products'] == 0
-    assert stats['species_counts']['dog'] == 70
-    assert stats['species_counts']['cat'] == 56
-    assert stats['species_counts']['fish'] == 21
-    assert stats['species_counts']['bird'] == 18
-    assert stats['species_counts']['ferret'] == 6
-    assert stats['species_counts']['hermit-crab'] == 5
-    assert stats['category_counts']['food'] == 58
-    assert stats['category_counts']['toys'] == 30
-    assert stats['category_counts']['habitat'] == 30
+    assert stats['species_counts']['dog'] == 117
+    assert stats['species_counts']['cat'] == 93
+    assert stats['species_counts']['fish'] == 44
+    assert stats['species_counts']['bird'] == 33
+    assert stats['species_counts']['ferret'] == 16
+    assert stats['species_counts']['hermit-crab'] == 12
+    assert stats['species_counts']['gerbil'] == 10
+    assert stats['species_counts']['mouse'] == 10
+    assert stats['species_counts']['amphibian'] == 10
+    assert stats['category_counts']['food'] == 82
+    assert stats['category_counts']['toys'] == 47
+    assert stats['category_counts']['habitat'] == 65
+    assert stats['category_counts']['supplements'] == 17
+    assert stats['category_counts']['heating-lighting'] == 25
     assert stats['shopping_species_counts']['dog'] == 473
     assert stats['shopping_species_counts']['guinea-pig'] == 66
     assert stats['shopping_species_counts']['ferret'] == 159
@@ -372,9 +389,10 @@ def test_inventory_is_product_type_coverage_not_fake_retail_stock(api):
 def test_every_active_product_and_inventory_concept_has_affiliate_path(api):
     client, _ = api
     products = client.get('/products', params={'limit': 500}).json()
-    assert len(products) == 258
+    products += client.get('/products', params={'limit': 500, 'offset': 500}).json()
+    assert len(products) == 516
     assert all(product['amazon_link_available'] for product in products)
-    assert sum(product['verified_amazon_product_link'] for product in products) == 256
+    assert sum(product['verified_amazon_product_link'] for product in products) == 514
     assert sum(product['affiliate_search_available'] for product in products) == 2
     assert all(any(option['retailer'] == 'amazon' and option['affiliate']
                    for option in product['retailer_options']) for product in products)

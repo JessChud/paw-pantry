@@ -276,7 +276,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry Connector API", version="0.10.0", lifespan=lifespan,
+    title="Paw Pantry Connector API", version="0.11.0", lifespan=lifespan,
     description="Stateless pet-supply search and refill estimates for Muse. "
                 "The connector cannot read or write Paw Pantry's private pet workspace. "
                 "Retailer actions open only after the user chooses them, and the supplied "
@@ -447,16 +447,24 @@ SEARCH_ALIASES = {
     "bunny": ("rabbit",), "bunnies": ("rabbit",),
     "parakeet": ("bird",), "cockatiel": ("bird",),
     "guinea": ("guinea-pig",), "cavy": ("guinea-pig",),
-    "gecko": ("reptile",),
+    "gecko": ("lizard", "reptile"), "frog": ("amphibian",),
+    "toad": ("amphibian",), "mice": ("mouse",), "tortoise": ("turtle",),
     "terrarium": ("reptile", "habitat"), "substrate": ("bedding", "habitat"),
     "aquarium": ("fish", "habitat"), "tank": ("fish", "habitat"),
     "feed": ("food",), "hungry": ("food",), "kibble": ("food",), "hay": ("food",),
-    "snack": ("treats",), "snacks": ("treats",), "training": ("treats",),
+    "snack": ("treats",), "snacks": ("treats",),
+    "training": ("training", "treats"), "clicker": ("training",),
     "chew": ("toys",), "chewer": ("dog", "toys"), "play": ("toys",),
-    "scratch": ("toys",), "scratching": ("toys",),
+    "scratch": ("furniture", "toys"), "scratching": ("furniture", "toys"),
     "poop": ("supplies", "waste", "bags"), "waste": ("supplies", "bags"),
     "bath": ("grooming",), "shampoo": ("grooming",), "brush": ("grooming",),
     "comb": ("grooming", "flea-tick"),
+    "vitamin": ("supplements",), "vitamins": ("supplements",),
+    "supplement": ("supplements",), "supplements": ("supplements",),
+    "probiotic": ("supplements",), "joint": ("supplements",),
+    "uvb": ("heating-lighting",), "thermostat": ("heating-lighting",),
+    "lamp": ("heating-lighting",), "filter": ("maintenance",),
+    "pump": ("maintenance",),
     "bed": ("beds",), "mat": ("beds",),
     "crate": ("carriers",), "carrier": ("carriers",),
     "leash": ("leashes",), "harness": ("leashes",), "collar": ("leashes",),
@@ -516,6 +524,8 @@ def product_search_score(product: Product, query: str) -> int:
                 len(word) >= 4 and (token in word or word in token)
                 for word in available):
             score += 2
+        if token == product.category:
+            score += 12
         for alias in SEARCH_ALIASES.get(token, ()):
             if alias == product.category:
                 score += 12
@@ -583,6 +593,8 @@ def intent_search_score(intent: dict, query: str) -> int:
                 len(word) >= 4 and (token in word or word in token)
                 for word in available):
             score += 2
+        if token == intent["category"]:
+            score += 12
         for alias in SEARCH_ALIASES.get(token, ()):
             if alias == intent["category"]:
                 score += 12
@@ -1221,7 +1233,7 @@ def muse_openapi():
     ]
     schema = get_openapi(
         title="Paw Pantry Connector API",
-        version="0.10.0",
+        version="0.11.0",
         description=("Stateless pet-supply search and refill estimates for Muse. "
                      "This contract cannot access Paw Pantry's private pet-profile workspace. "
                      "Inventory matches include a first-party Paw Pantry guidance page and a "

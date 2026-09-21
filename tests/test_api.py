@@ -45,6 +45,13 @@ def test_auth_and_schema(api):
         '/products/{product_id}/link', '/refill-estimate',
     }
     assert not any(path.startswith('/pets') for path in schema['paths'])
+    assert {spec['operationId'] for methods in schema['paths'].values()
+            for spec in methods.values()} == {
+        'check_service_health', 'check_connector_readiness',
+        'search_curated_products', 'search_product_type_inventory',
+        'get_catalog_statistics', 'find_shopping_options',
+        'get_retailer_link', 'estimate_refill_date',
+    }
 
 
 def test_connector_key_is_limited_to_stateless_operations(api):
@@ -348,6 +355,23 @@ def test_every_active_product_and_inventory_concept_has_affiliate_path(api):
     assert len(inventory) == 100
     assert all(row['retailer_options'][0]['affiliate'] for row in inventory)
     assert all(row['retailer_options'][0]['opens_after_user_click'] for row in inventory)
+
+
+def test_catalog_and_inventory_support_stable_pagination(api):
+    client, _ = api
+    first_products = client.get('/products', params={'limit': 7, 'offset': 0}).json()
+    second_products = client.get('/products', params={'limit': 7, 'offset': 7}).json()
+    assert len(first_products) == len(second_products) == 7
+    assert {row['id'] for row in first_products}.isdisjoint(
+        row['id'] for row in second_products)
+
+    first_inventory = client.get('/inventory', params={'limit': 11, 'offset': 0}).json()
+    second_inventory = client.get('/inventory', params={'limit': 11, 'offset': 11}).json()
+    assert len(first_inventory) == len(second_inventory) == 11
+    assert {row['id'] for row in first_inventory}.isdisjoint(
+        row['id'] for row in second_inventory)
+    assert client.get('/products', params={'offset': -1}).status_code == 422
+    assert client.get('/inventory', params={'offset': 10001}).status_code == 422
 
 
 def test_recommendation_library_and_first_party_source_page(api):

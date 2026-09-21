@@ -714,7 +714,7 @@ def ping():
 
 
 @app.head("/health", include_in_schema=False)
-@app.get("/health")
+@app.get("/health", operation_id="check_service_health")
 def health(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
@@ -723,7 +723,7 @@ def health(db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-@app.get("/ready")
+@app.get("/ready", operation_id="check_connector_readiness")
 def ready(db: Session = Depends(get_db)):
     """Connector readiness without revealing credentials or database details."""
     if not MUSE_CONNECTOR_API_KEY:
@@ -982,21 +982,32 @@ def runout(pet_id: int, db: Session = Depends(get_db)):
 
 
 # ---- catalog ----
-@app.get("/products", dependencies=[Depends(require_connector_key)], response_model=list[CatalogProduct])
+@app.get(
+    "/products",
+    dependencies=[Depends(require_connector_key)],
+    response_model=list[CatalogProduct],
+    operation_id="search_curated_products",
+)
 def list_products(species: Optional[str] = Query(default=None, max_length=60),
                   category: Optional[str] = Query(default=None, max_length=60),
                   q: Optional[str] = Query(default=None, max_length=200),
-                  limit: int = Query(default=50, ge=1, le=200), db: Session = Depends(get_db)):
+                  limit: int = Query(default=50, ge=1, le=500),
+                  offset: int = Query(default=0, ge=0, le=10000),
+                  db: Session = Depends(get_db)):
     """Search products and return display-ready retailer buttons and disclosures.
 
     Clients may surface each `retailer_options` entry directly. They must show its
     disclosure with the button and open the URL only after the user chooses it.
     """
-    products, _ = matching_products(db, species, category, q, limit)
-    return [product_to_dict(p) for p in products]
+    products, _ = matching_products(db, species, category, q, limit + offset)
+    return [product_to_dict(p) for p in products[offset:offset + limit]]
 
 
-@app.get("/catalog-stats", response_model=CatalogStats)
+@app.get(
+    "/catalog-stats",
+    response_model=CatalogStats,
+    operation_id="get_catalog_statistics",
+)
 def catalog_stats(db: Session = Depends(get_db)):
     """Public, non-sensitive counts describing the current connector inventory."""
     metadata = catalog_metadata()
@@ -1039,19 +1050,28 @@ def catalog_stats(db: Session = Depends(get_db)):
     }
 
 
-@app.get("/inventory", dependencies=[Depends(require_connector_key)],
-         response_model=list[InventoryListing])
+@app.get(
+    "/inventory",
+    dependencies=[Depends(require_connector_key)],
+    response_model=list[InventoryListing],
+    operation_id="search_product_type_inventory",
+)
 def inventory(species: Optional[str] = Query(default=None, max_length=60),
               category: Optional[str] = Query(default=None, max_length=60),
               q: Optional[str] = Query(default=None, max_length=200),
-              limit: int = Query(default=25, ge=1, le=100)):
+              limit: int = Query(default=25, ge=1, le=100),
+              offset: int = Query(default=0, ge=0, le=10000)):
     """Search broad product-type coverage; records are not live retailer stock."""
-    matches, _ = matching_intents(species, category, q, limit)
-    return [intent_to_listing(intent) for intent in matches]
+    matches, _ = matching_intents(species, category, q, limit + offset)
+    return [intent_to_listing(intent) for intent in matches[offset:offset + limit]]
 
 
-@app.get("/shopping-options", dependencies=[Depends(require_connector_key)],
-         response_model=ShoppingOptionsResult)
+@app.get(
+    "/shopping-options",
+    dependencies=[Depends(require_connector_key)],
+    response_model=ShoppingOptionsResult,
+    operation_id="find_shopping_options",
+)
 def shopping_options(q: str = Query(min_length=2, max_length=200),
                      species: Optional[str] = Query(default=None, max_length=60),
                      category: Optional[str] = Query(default=None, max_length=60),
@@ -1085,8 +1105,12 @@ def shopping_options(q: str = Query(min_length=2, max_length=200),
     }
 
 
-@app.get("/products/{product_id}/link", dependencies=[Depends(require_connector_key)],
-         response_model=ProductLinkResult)
+@app.get(
+    "/products/{product_id}/link",
+    dependencies=[Depends(require_connector_key)],
+    response_model=ProductLinkResult,
+    operation_id="get_retailer_link",
+)
 def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon", db: Session = Depends(get_db)):
     """Return one display-ready, user-initiated affiliate retailer action."""
     p = db.get(Product, product_id)
@@ -1115,8 +1139,12 @@ def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon
             "source_page_url": f"{PUBLIC_BASE_URL}/catalog#product-{p.id}"}
 
 
-@app.post("/refill-estimate", dependencies=[Depends(require_connector_key)],
-          response_model=RefillEstimateResult)
+@app.post(
+    "/refill-estimate",
+    dependencies=[Depends(require_connector_key)],
+    response_model=RefillEstimateResult,
+    operation_id="estimate_refill_date",
+)
 def refill_estimate(body: RefillEstimateRequest):
     """Calculate a refill estimate without storing a pet profile or supply record."""
     days_total = body.package_amount / body.daily_use

@@ -12,6 +12,8 @@ Public pages: `/`, `/catalog`, `/recommendations`, `/shop/{intent_id}`, `/guide`
 
 The published Muse contract is stateless and excludes every private pet-profile and supply-record route. Muse receives `MUSE_CONNECTOR_API_KEY`, which can call only catalog search, shopping options, retailer links, and the stateless refill estimator. The separate `PAW_PANTRY_API_KEY` remains required for all stored pet and supply operations. Startup fails if the two keys are equal.
 
+Muse users therefore cannot overwrite one another's Paw Pantry data: the published connector has no stored user record to create or mutate. Muse supplies current-request context to the stateless tools. Any future connector feature that stores profiles, reminders, or preferences must add end-user OAuth or an equivalent verified user identity plus tenant-scoped database queries before its write routes can enter the published OpenAPI contract.
+
 Supported examples:
 
 - Search the starter catalog by species, category, or keyword. Each result includes
@@ -57,6 +59,9 @@ library covers 20 pet types across 23 categories. `/inventory` searches that cov
 library, while `/shopping-options` combines it with curated products and tagged Amazon
 searches. `/recommendations` makes the full library browsable on Paw Pantry, and each
 `/shop/{intent_id}` page supplies relevant original guidance before the retailer action.
+`/products` and `/inventory` accept `limit` and `offset`, so a client can enumerate
+the growing catalogs without dropping records. Connector operations use concise,
+stable OpenAPI operation IDs so Muse can select tools reliably across deployments.
 
 When `OPENAI_API_KEY` is set, product and shopping-intent search uses
 `text-embedding-3-small` with 256-dimensional embeddings to combine semantic relevance

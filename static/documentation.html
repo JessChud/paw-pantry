@@ -19,8 +19,8 @@
 
 <h2>Connector operations</h2>
 <ul>
-  <li><code>GET /products</code> — filter 129 active curated products by query, species, and category. Up to 200 matches can be returned.</li>
-  <li><code>GET /inventory</code> — search 2,771 product-type and shopping-constraint records across 20 pet types and 23 supply categories. These are matching concepts, not live retailer stock.</li>
+  <li><code>GET /products</code> — filter the active curated catalog by query, species, and category. Use <code>limit</code> and <code>offset</code> for stable pagination.</li>
+  <li><code>GET /inventory</code> — search 2,771 product-type and shopping-constraint records across 20 pet types and 23 supply categories. These are matching concepts, not live retailer stock. Use <code>limit</code> and <code>offset</code> for pagination.</li>
   <li><code>GET /shopping-options</code> — rank curated matches and return clearly typed Amazon product or search actions.</li>
   <li><code>GET /products/{product_id}/link</code> — return one validated, display-ready retailer action.</li>
   <li><code>POST /refill-estimate</code> — calculate days left, run-out date, and reorder date without saving the inputs.</li>
@@ -34,6 +34,7 @@
 
 <h2>Data handling</h2>
 <p>Catalog searches use only the query and optional filters in the current request. Refill estimates use only the supplied date, package amount, daily use, unit, and reorder lead time; those values are not stored as a pet profile or supply record. When optional semantic matching is enabled, the shopping query is sent to OpenAI to create a numerical embedding. Stored private pet and supply records are never sent for semantic matching and are inaccessible to the Muse credential.</p>
+<p>Muse users do not share a writable Paw Pantry account or record namespace. The connector operations are read-only except for the stateless refill calculation, which saves nothing. If Paw Pantry later exposes saved profiles to Muse, that will require per-user authorization and tenant-scoped records before any write route is published.</p>
 
 <h2>Support and policies</h2>
 <p>Email <a href="mailto:hellopawpantry@gmail.com">hellopawpantry@gmail.com</a>. See the <a href="/privacy">Privacy Policy</a>, <a href="/terms">Terms of Service</a>, and <a href="/about">editorial and affiliate policy</a>.</p>

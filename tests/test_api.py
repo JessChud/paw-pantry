@@ -34,7 +34,7 @@ def supply_payload(**overrides):
 
 def all_products(client):
     rows = []
-    for offset in range(0, 10001, 500):
+    for offset in range(0, 100001, 500):
         page = client.get('/products', params={'limit': 500, 'offset': offset}).json()
         rows.extend(page)
         if len(page) < 500:
@@ -501,7 +501,15 @@ def test_catalog_and_inventory_support_stable_pagination(api):
     assert {row['id'] for row in first_inventory}.isdisjoint(
         row['id'] for row in second_inventory)
     assert client.get('/products', params={'offset': -1}).status_code == 422
-    assert client.get('/inventory', params={'offset': 10001}).status_code == 422
+    assert client.get('/inventory', params={'offset': 10001}).json() == []
+    assert client.get('/products', params={'offset': 10001}).json() == []
+    assert client.get('/catalog', params={'offset': -1}).status_code == 422
+    first_catalog = client.get('/catalog')
+    second_catalog = client.get('/catalog', params={'offset': 48})
+    assert first_catalog.text.count('<article id="product-') == 48
+    assert second_catalog.text.count('<article id="product-') == 48
+    assert 'offset=48' in first_catalog.text
+    assert 'offset=0' in second_catalog.text
 
 
 def test_recommendation_library_and_first_party_source_page(api):
@@ -534,6 +542,24 @@ def test_semantic_ranking_can_retrieve_without_keyword_overlap(api, monkeypatch)
     assert result['matching_method'] == 'hybrid-semantic'
     assert result['semantic_model'] == 'test-small-embedding'
     assert result['curated_products'][0]['id'] == 17
+
+
+def test_semantic_product_reranking_has_bounded_request_size(api, monkeypatch):
+    client, module = api
+    seen = []
+
+    class RecordingRanker:
+        enabled = True
+        model = 'test-small-embedding'
+
+        def rank(self, query, item_texts):
+            seen.append(len(item_texts))
+            return None
+
+    monkeypatch.setattr(module, 'SEMANTIC_RANKER', RecordingRanker())
+    result = client.get('/products', params={'q': 'dog food', 'limit': 5})
+    assert result.status_code == 200
+    assert seen == [128]
 
 
 def test_default_purchase_date_and_restart_preserve_records(api):

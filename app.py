@@ -23,7 +23,7 @@ from fastapi.security import APIKeyHeader
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine, text
+from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine, or_, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 from affiliate_links import valid_chewy_link
@@ -702,12 +702,15 @@ def intent_to_listing(intent: dict) -> dict:
 
 def matching_intents(species: Optional[str], category: Optional[str],
                      query_text: Optional[str], limit: int) -> tuple[list[dict], str]:
+    normalized_query = normalized_search_query(query_text) if query_text else ""
+    species_signals = requested_species(query_tokens(normalized_query)) if normalized_query else set()
     intents = [intent for intent in inventory_concepts()
                if (not species or intent["species"] in {species.lower(), "any"})
+               and (species or not species_signals
+                    or intent["species"] in species_signals | {"any"})
                and (not category or intent["category"] == category.lower())]
     method = "keyword"
     if query_text:
-        normalized_query = normalized_search_query(query_text)
         lexical = {intent["id"]: intent_search_score(intent, normalized_query)
                    for intent in intents}
         # Embed only the reviewed base concepts. The thousands of constraint
@@ -734,7 +737,8 @@ def matching_intents(species: Optional[str], category: Optional[str],
 
 
 def matching_products(db: Session, species: Optional[str], category: Optional[str],
-                      query_text: Optional[str], limit: int) -> tuple[list[Product], str]:
+                      query_text: Optional[str], limit: int,
+                      offset: int = 0) -> tuple[list[Product], str]:
     query = db.query(Product)
     retired_ids = [int(key) for key, value in catalog_metadata().items()
                    if value.get("catalog_status") == "retired"]
@@ -744,15 +748,27 @@ def matching_products(db: Session, species: Optional[str], category: Optional[st
         query = query.filter(Product.species.in_([species.lower(), "any"]))
     if category:
         query = query.filter(Product.category == category.lower())
-    products = query.all()
+    normalized_query = normalized_search_query(query_text) if query_text else ""
+    if normalized_query and not species:
+        species_signals = requested_species(query_tokens(normalized_query))
+        if species_signals:
+            query = query.filter(Product.species.in_(species_signals | {"any"}))
     method = "keyword"
+    if not query_text:
+        return query.order_by(Product.id).offset(offset).limit(limit).all(), method
+    products = query.all()
     if query_text:
-        normalized_query = normalized_search_query(query_text)
         lexical = {product.id: product_search_score(product, normalized_query)
                    for product in products}
+        # A whole-catalog embedding request becomes slow and expensive as the
+        # catalog grows. Use the inexpensive lexical pass to choose a bounded
+        # semantic reranking set; keep the full lexical results as fallback.
+        semantic_candidates = sorted(
+            products, key=lambda product: (-lexical[product.id], product.id))[:128]
         semantic = SEMANTIC_RANKER.rank(
             normalized_query,
-            {product.id: product_embedding_text(product) for product in products})
+            {product.id: product_embedding_text(product)
+             for product in semantic_candidates})
         if semantic:
             method = "hybrid-semantic"
             maximum = max(lexical.values(), default=0) or 1
@@ -766,7 +782,7 @@ def matching_products(db: Session, species: Optional[str], category: Optional[st
             products = [product for product in sorted(
                 products, key=lambda product: (-lexical[product.id], product.id))
                 if lexical[product.id] > 0]
-    return products[:limit], method
+    return products[offset:offset + limit], method
 
 
 def seed():
@@ -874,15 +890,29 @@ def shopping_guide(slug: str):
 def public_catalog(q: str = Query(default="", max_length=200),
                    species: str = Query(default="", max_length=60),
                    category: str = Query(default="", max_length=60),
+                   offset: int = Query(default=0, ge=0),
                    db: Session = Depends(get_db)):
     sources = catalog_metadata()
     program = chewy_program()
-    all_products = [p for p in db.query(Product).order_by(Product.id).all()
-                    if sources.get(str(p.id), {}).get("catalog_status") != "retired"]
-    products = [p for p in all_products
-                if (not species or p.species in (species.lower(), "any"))
-                and (not category or p.category == category.lower())
-                and (not q or q.lower() in f"{p.name} {p.brand} {p.category} {p.notes}".lower())]
+    retired_ids = [int(key) for key, value in sources.items()
+                   if value.get("catalog_status") == "retired"]
+    query = db.query(Product)
+    if retired_ids:
+        query = query.filter(Product.id.notin_(retired_ids))
+    if species:
+        query = query.filter(Product.species.in_([species.lower(), "any"]))
+    if category:
+        query = query.filter(Product.category == category.lower())
+    if q:
+        literal = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        pattern = f"%{literal}%"
+        query = query.filter(or_(Product.name.ilike(pattern, escape="\\"),
+                                 Product.brand.ilike(pattern, escape="\\"),
+                                 Product.category.ilike(pattern, escape="\\"),
+                                 Product.notes.ilike(pattern, escape="\\")))
+    count = query.count()
+    page_size = 48
+    products = query.order_by(Product.id).offset(offset).limit(page_size).all()
     cards = []
     for p in products:
         links = []
@@ -922,12 +952,23 @@ def public_catalog(q: str = Query(default="", max_length=200),
             f'<option value="{escape(v, quote=True)}"{(" selected" if v == selected.lower() else "")}>{escape(display_labels.get(v, v.replace("-", " ").title()))}</option>'
             for v in sorted(values))
     page = (BASE_DIR / "static" / "catalog.html").read_text()
+    filter_params = {key: value for key, value in (("q", q), ("species", species),
+                                                    ("category", category)) if value}
+    def page_link(next_offset: int, label: str) -> str:
+        return f'<a href="/catalog?{escape(urlencode({**filter_params, "offset": next_offset}), quote=True)}">{label}</a>'
+    pagination = " · ".join(
+        ([page_link(max(0, offset - page_size), "← Previous")]
+         if offset > 0 else [])
+        + ([page_link(offset + page_size, "Next →")]
+           if offset + page_size < count else [])
+    )
     replacements = {
         "{{QUERY}}": escape(q, quote=True),
-        "{{SPECIES}}": options({p.species for p in all_products}, species, "All pets"),
-        "{{CATEGORIES}}": options({p.category for p in all_products}, category, "All categories"),
-        "{{COUNT}}": str(len(products)),
+        "{{SPECIES}}": options({value for (value,) in db.query(Product.species).distinct()}, species, "All pets"),
+        "{{CATEGORIES}}": options({value for (value,) in db.query(Product.category).distinct()}, category, "All categories"),
+        "{{COUNT}}": str(count),
         "{{PRODUCTS}}": ''.join(cards) or '<p>No matching products yet. Try a broader search.</p>',
+        "{{PAGINATION}}": pagination,
     }
     return re.sub(r"\{\{[A-Z]+\}\}", lambda match: replacements.get(match.group(), match.group()), page)
 
@@ -1082,15 +1123,15 @@ def list_products(species: Optional[str] = Query(default=None, max_length=60),
                   category: Optional[str] = Query(default=None, max_length=60),
                   q: Optional[str] = Query(default=None, max_length=200),
                   limit: int = Query(default=50, ge=1, le=500),
-                  offset: int = Query(default=0, ge=0, le=10000),
+                  offset: int = Query(default=0, ge=0),
                   db: Session = Depends(get_db)):
     """Search products and return display-ready retailer buttons and disclosures.
 
     Clients may surface each `retailer_options` entry directly. They must show its
     disclosure with the button and open the URL only after the user chooses it.
     """
-    products, _ = matching_products(db, species, category, q, limit + offset)
-    return [product_to_dict(p) for p in products[offset:offset + limit]]
+    products, _ = matching_products(db, species, category, q, limit, offset)
+    return [product_to_dict(p) for p in products]
 
 
 @app.get(
@@ -1151,7 +1192,7 @@ def inventory(species: Optional[str] = Query(default=None, max_length=60),
               category: Optional[str] = Query(default=None, max_length=60),
               q: Optional[str] = Query(default=None, max_length=200),
               limit: int = Query(default=25, ge=1, le=100),
-              offset: int = Query(default=0, ge=0, le=10000)):
+              offset: int = Query(default=0, ge=0)):
     """Search broad product-type coverage; records are not live retailer stock."""
     matches, _ = matching_intents(species, category, q, limit + offset)
     return [intent_to_listing(intent) for intent in matches[offset:offset + limit]]

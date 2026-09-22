@@ -346,11 +346,20 @@ def catalog_metadata():
     return json.loads(path.read_text()) if path.exists() else {}
 
 
-def valid_amazon_link(url):
-    parsed = urlparse(url or "")
-    return (parsed.scheme == "https" and parsed.hostname in {"www.amazon.com", "amazon.com"}
-            and not parsed.username and not parsed.password
-            and parse_qs(parsed.query).get("tag") == ["pawpantry-20"])
+def valid_amazon_link(url, source):
+    """Publish an exact product action only for a recorded, tagged ASIN."""
+    try:
+        parsed = urlparse(url or "")
+        match = re.match(r"^/dp/([A-Z0-9]{10})(?:/|$)", parsed.path)
+        return (parsed.scheme == "https" and parsed.hostname in {"www.amazon.com", "amazon.com"}
+                and not parsed.username and not parsed.password
+                and parsed.port in (None, 443)
+                and match is not None
+                and match.group(1) == source.get("amazon_asin")
+                and bool(source.get("amazon_checked") and source.get("verified_variant"))
+                and parse_qs(parsed.query).get("tag") == ["pawpantry-20"])
+    except ValueError:
+        return False
 
 
 DISCLOSURE = ("Paw Pantry may earn a commission if you buy through this link, "
@@ -406,7 +415,7 @@ def retailer_options(p: Product, metadata: Optional[dict] = None) -> list[dict]:
         return []
     options = []
     source_page_url = f"{PUBLIC_BASE_URL}/catalog#product-{p.id}"
-    if valid_amazon_link(p.amazon_url):
+    if valid_amazon_link(p.amazon_url, metadata):
         options.append({
             "retailer": "amazon",
             "destination": "Amazon",
@@ -453,7 +462,7 @@ def product_to_dict(p: Product) -> dict:
         "catalog_status": "retired" if retired else "active",
         "replacement_product_id": metadata.get("replacement_product_id"),
         "amazon_link_available": any(option["retailer"] == "amazon" for option in options),
-        "verified_amazon_product_link": valid_amazon_link(p.amazon_url) and not retired,
+        "verified_amazon_product_link": valid_amazon_link(p.amazon_url, metadata) and not retired,
         "affiliate_search_available": any(
             option["retailer"] == "amazon" and option["kind"] == "search"
             for option in options),
@@ -918,7 +927,7 @@ def public_catalog(q: str = Query(default="", max_length=200),
         links = []
         source = sources.get(str(p.id), {})
         display_name = " ".join(value for value in (p.brand, p.name) if value)
-        if valid_amazon_link(p.amazon_url):
+        if valid_amazon_link(p.amazon_url, source):
             links.append(f'<div class="retailer"><a class="link" rel="sponsored nofollow noopener" href="{escape(p.amazon_url, quote=True)}">Check on Amazon</a>'
                          '<p class="link-disclosure">Affiliate link — Paw Pantry may earn a commission.</p></div>')
         else:
@@ -1162,8 +1171,8 @@ def catalog_stats(db: Session = Depends(get_db)):
         "active_curated_products": len(active),
         "retired_products": len(products) - len(active),
         "shopping_intents": len(intents),
-        "verified_amazon_products": sum(valid_amazon_link(product.amazon_url)
-                                        for product in active),
+        "verified_amazon_products": sum(valid_amazon_link(
+            product.amazon_url, metadata.get(str(product.id), {})) for product in active),
         "affiliate_enabled_active_products": sum(bool(retailer_options(
             product, metadata.get(str(product.id), {})))
                                                  for product in active),
@@ -1304,7 +1313,7 @@ def product_link(product_id: int, retailer: Literal["amazon", "chewy"] = "amazon
     url = p.chewy_url if retailer == "chewy" else p.amazon_url
     if retailer == "chewy" and not valid_chewy_link(url, source, chewy_program()):
         raise HTTPException(409, "verified Chewy affiliate link not available for this product yet")
-    if retailer == "amazon" and not valid_amazon_link(url):
+    if retailer == "amazon" and not valid_amazon_link(url, source):
         option = amazon_search_option(
             " ".join(value for value in (p.brand, p.name) if value),
             p.species, p.category,

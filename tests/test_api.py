@@ -623,6 +623,20 @@ def test_wrong_tracking_tag_is_not_published(api):
     assert 'wrong-owner-20' not in client.get('/catalog').text
 
 
+def test_tagged_but_unrecorded_amazon_product_is_not_published(api):
+    client, module = api
+    unrecorded = 'https://www.amazon.com/dp/B000000000?tag=pawpantry-20'
+    with module.SessionLocal.begin() as db:
+        db.get(module.Product, 1).amazon_url = unrecorded
+    product = next(row for row in client.get('/products').json() if row['id'] == 1)
+    assert product['verified_amazon_product_link'] is False
+    assert product['retailer_options'][0]['kind'] == 'search'
+    assert 'tag=pawpantry-20' in product['retailer_options'][0]['url']
+    assert client.get('/products/1/link').json()['kind'] == 'search'
+    assert unrecorded not in client.get('/catalog').text
+    assert client.get('/catalog-stats').json()['verified_amazon_products'] == 3997
+
+
 def test_retired_variants_keep_supply_history(api):
     client, _ = api
     pet_id = pet(client)

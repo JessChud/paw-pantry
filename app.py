@@ -821,6 +821,11 @@ def ready(db: Session = Depends(get_db)):
 
 
 # ---- homepage + static legal pages (served so /, /privacy and /terms work on the free subdomain) ----
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return RedirectResponse("/static/icon.png", status_code=307)
+
+
 @app.head("/", response_class=HTMLResponse, include_in_schema=False)
 @app.get("/", response_class=HTMLResponse)
 def home():

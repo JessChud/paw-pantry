@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from affiliate_links import valid_chewy_link
 
+# These two older listings predate the exact-link requirement. Do not extend
+# this set when adding products: every new active product needs a checked ASIN.
+LEGACY_SEARCH_ONLY_PRODUCT_IDS = {16, 22}
+
 
 def check():
     products = json.loads((ROOT / 'data/seed_products.json').read_text())
@@ -39,6 +43,10 @@ def check():
                 errors.append(f"Product {product['id']}: Chewy approval or exact-link/variant verification missing or invalid")
         url = product.get('amazon_url')
         if not url:
+            source = metadata.get(str(product['id']), {})
+            if (source.get('catalog_status') != 'retired'
+                    and product['id'] not in LEGACY_SEARCH_ONLY_PRODUCT_IDS):
+                errors.append(f"Product {product['id']}: active products require an exact Amazon affiliate link")
             continue
         linked += 1
         parsed = urlparse(url)
@@ -59,7 +67,8 @@ def check():
     print(f'{linked} Amazon links passed ASIN, variant-record, HTTPS, and tracking-tag checks.')
     active = sum(metadata.get(str(product['id']), {}).get('catalog_status') != 'retired'
                  for product in products)
-    print(f'{active} active catalog products have an exact product link or a generated tagged search fallback.')
+    print(f'{active} active catalog products: {linked} exact tagged Amazon links and '
+          f'{active - linked} legacy tagged search fallbacks; new products require exact links.')
     print(f'{len(intents)} shopping intents have generated tagged Amazon searches and first-party source pages.')
     print(f'{chewy_linked} Chewy links passed approval, exact-link, HTTPS, and variant-record checks. Program status: {program.get("status", "unconfigured")}.')
 

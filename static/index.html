@@ -21,6 +21,8 @@
   ol, ul { padding-left: 22px; }
   li { margin-bottom: 8px; }
   .disclosure { font-size: .9rem; color: var(--muted); background: #fef9e7; border: 1px dashed #e5c96b; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+  .supply-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 12px; margin-top: 12px; text-align: center; }
+  .supply-links a { white-space: nowrap; }
   footer { text-align: center; color: var(--muted); font-size: .9rem; margin-top: 32px; }
   footer a { color: var(--muted); margin: 0 8px; }
 </style>
@@ -40,7 +42,13 @@
 
   <section class="pet-section">
     <h2>Plan everyday pet supplies</h2>
-    <p>Work out when to refill a supply, compare package sizes, and prepare a shopping list with our free planning guides and calculator. Browse catalog examples or search the broader recommendation library when you are ready to compare options.</p><p style="margin-top:12px"><a href="/guide">Read the shopping guides</a> · <a href="/calculator">Calculate a refill</a> · <a href="/catalog">Explore curated products</a> · <a href="/recommendations">Search all product types</a></p>
+    <p>Work out when to refill a supply, compare package sizes, and prepare a shopping list with our free planning guides and calculator. Browse catalog examples or search the broader recommendation library when you are ready to compare options.</p>
+    <nav class="supply-links" aria-label="Supply planning links">
+      <a href="/guide">Read the shopping guides</a>
+      <a href="/calculator">Calculate a refill</a>
+      <a href="/catalog">Explore curated products</a>
+      <a href="/recommendations">Search all product types</a>
+    </nav>
   </section>
 
   <section class="pet-section">

@@ -1,6 +1,6 @@
 # Paw Pantry
 
-Private single-owner pet profiles, supply estimates, and a public pet-supply catalog. The website is hosted on Render at https://paw-pantry.onrender.com. Production data is stored separately in Neon Postgres so application redeploys do not erase it.
+Private single-owner pet profiles, supply estimates, and a public pet-supply catalog. The primary website is https://paw-supplies.com, hosted on the existing Render service. The original https://paw-pantry.onrender.com API and OpenAPI URLs remain available for submitted connector applications; public shopping pages redirect to the custom domain. Production data is stored separately in Neon Postgres so application redeploys do not erase it.
 
 ## Run locally
 

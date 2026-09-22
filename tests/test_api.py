@@ -64,6 +64,23 @@ def test_auth_and_schema(api):
     }
 
 
+def test_custom_domain_keeps_submitted_render_api_working(api):
+    client, _ = api
+    old = 'https://paw-pantry.onrender.com'
+    new = 'https://paw-supplies.com'
+    response = client.get(old + '/catalog?q=dog%20food', follow_redirects=False)
+    assert response.status_code == 308
+    assert response.headers['location'] == new + '/catalog?q=dog%20food'
+    assert client.head(old + '/', follow_redirects=False).headers['location'] == new + '/'
+    assert client.get(new + '/').status_code == 200
+    for path in ('/openapi.json', '/docs', '/documentation', '/privacy', '/terms',
+                 '/ready', '/shopping-options?q=hamster+food'):
+        response = client.get(old + path, follow_redirects=False)
+        assert response.status_code == 200, path
+        assert 'location' not in response.headers, path
+    assert client.get(new + '/shopping-options?q=hamster+food').status_code == 200
+
+
 def test_connector_key_is_limited_to_stateless_operations(api):
     client, module = api
     connector_headers = {'X-API-Key': 'test-muse-secret'}
@@ -448,7 +465,7 @@ def test_inventory_is_product_type_coverage_not_fake_retail_stock(api):
     assert all(row['species'] in {'reptile', 'any'} for row in result)
     assert all(row['category'] == 'habitat' for row in result)
     assert all('url' not in row and 'price' not in row for row in result)
-    assert all(row['website_url'].startswith('https://paw-pantry.onrender.com/shop/')
+    assert all(row['website_url'].startswith('https://paw-supplies.com/shop/')
                for row in result)
     assert all(row['retailer_options'][0]['kind'] == 'search' for row in result)
     assert all('tag=pawpantry-20' in row['retailer_options'][0]['url'] for row in result)

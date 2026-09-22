@@ -17,10 +17,10 @@ from urllib.parse import parse_qs, urlencode, urlparse
 from pathlib import Path
 from typing import Literal, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.openapi.utils import get_openapi
 from fastapi.security import APIKeyHeader
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine, text
@@ -30,6 +30,8 @@ from affiliate_links import valid_chewy_link
 from semantic_search import SemanticRanker
 
 BASE_DIR = Path(__file__).parent
+PUBLIC_BASE_URL = "https://paw-supplies.com"
+LEGACY_PUBLIC_HOST = "paw-pantry.onrender.com"
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR}/pawpantry.db")
 API_KEY = os.getenv("PAW_PANTRY_API_KEY", "")
 MUSE_CONNECTOR_API_KEY = os.getenv("MUSE_CONNECTOR_API_KEY", "")
@@ -288,6 +290,22 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 
+@app.middleware("http")
+async def redirect_legacy_website(request: Request, call_next):
+    """Move public pages to the custom domain while preserving submitted API URLs."""
+    path = request.url.path
+    website_page = (path in {
+        "/", "/catalog", "/recommendations", "/guide", "/calculator",
+        "/about", "/tester",
+    } or path.startswith(("/shop/", "/guides/")))
+    if (request.method in {"GET", "HEAD"}
+            and request.url.hostname == LEGACY_PUBLIC_HOST
+            and website_page):
+        suffix = f"?{request.url.query}" if request.url.query else ""
+        return RedirectResponse(f"{PUBLIC_BASE_URL}{path}{suffix}", status_code=308)
+    return await call_next(request)
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -338,7 +356,6 @@ def valid_amazon_link(url):
 DISCLOSURE = ("Paw Pantry may earn a commission if you buy through this link, "
               "at no extra cost to you.")
 AMAZON_DISCLOSURE = DISCLOSURE + " As an Amazon Associate I earn from qualifying purchases."
-PUBLIC_BASE_URL = "https://paw-pantry.onrender.com"
 
 
 def amazon_search_option(query_text: str, species: Optional[str] = None,

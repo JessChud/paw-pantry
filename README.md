@@ -63,6 +63,12 @@ searches. `/recommendations` makes the full library browsable on Paw Pantry, and
 the growing catalogs without dropping records. Connector operations use concise,
 stable OpenAPI operation IDs so Muse can select tools reliably across deployments.
 
+Every search first runs through a local pet-shopping normalizer. It corrects
+high-confidence misspellings such as `hampster`, `kittten`, and `aquariam`, then
+applies species, category, product-type, and title signals. This step has no API
+cost and runs before either keyword or optional semantic ranking. The corrected
+wording is also used for broader retailer searches instead of forwarding the typo.
+
 When `OPENAI_API_KEY` is set, product and shopping-intent search uses
 `text-embedding-3-small` with 256-dimensional embeddings to combine semantic relevance
 with the offline keyword score. Catalog vectors are cached in memory; each request

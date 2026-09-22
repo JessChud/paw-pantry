@@ -274,6 +274,39 @@ def test_product_search_understands_common_pet_language(api):
     assert client.get('/shopping-options', params={'q': 'x' * 201}).status_code == 422
 
 
+@pytest.mark.parametrize(
+    ('query', 'species', 'product_category', 'intent_category', 'corrected_term', 'typo'), [
+    ('pet hampster', 'hamster', None, None, 'hamster', 'hampster'),
+    ('kittten litter', 'cat', 'litter', 'litter', 'kitten', 'kittten'),
+    ('aquariam filter', 'fish', 'maintenance', 'habitat', 'aquarium', 'aquariam'),
+    ('rabitt hay', 'rabbit', 'food', 'food', 'rabbit', 'rabitt'),
+    ('guiena pig food', 'guinea-pig', 'food', 'food', 'guinea', 'guiena'),
+])
+def test_search_corrects_common_pet_and_supply_typos(
+        api, query, species, product_category, intent_category, corrected_term, typo):
+    client, _ = api
+    result = client.get('/shopping-options', params={'q': query, 'limit': 3}).json()
+    assert result['curated_products'][0]['species'] == species
+    assert result['matched_inventory'][0]['species'] == species
+    if product_category:
+        assert result['curated_products'][0]['category'] == product_category
+    if intent_category:
+        assert result['matched_inventory'][0]['category'] == intent_category
+    amazon_url = result['broader_amazon_search']['url']
+    assert result['interpreted_query'] == query.replace(typo, corrected_term)
+    assert corrected_term in amazon_url
+    assert typo not in amazon_url
+
+
+def test_public_tester_shows_spelling_interpretation(api):
+    client, _ = api
+    client.headers.pop('X-API-Key')
+    response = client.get('/tester', params={'q': 'pet hampster'})
+    assert response.status_code == 200
+    assert 'Interpreted as “pet hamster”.' in response.text
+    assert '&quot;interpreted_query&quot;: &quot;pet hamster&quot;' in response.text
+
+
 def test_public_connector_tester_uses_real_results_without_exposing_credentials(api):
     client, _ = api
     client.headers.pop('X-API-Key')
@@ -291,7 +324,7 @@ def test_public_connector_tester_uses_real_results_without_exposing_credentials(
 
 
 @pytest.mark.parametrize(('query', 'expected_product_species', 'expected_intent'), [
-    ('terrarium substrate for leopard gecko', 'lizard', 'Reptile substrate'),
+    ('terrarium substrate for leopard gecko', 'reptile', 'Reptile substrate'),
     ('hay for my rabbit', 'rabbit', 'Timothy hay'),
     ('cage cleaner for my bird', 'bird', 'Cage cleaning brush'),
     ('indestructible toy for a power chewer', 'dog', 'Durable chew toy'),

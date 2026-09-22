@@ -8,6 +8,7 @@ import os
 import re
 from contextlib import asynccontextmanager
 from datetime import date, timedelta
+from difflib import get_close_matches
 from functools import lru_cache
 from hmac import compare_digest
 from html import escape
@@ -211,6 +212,7 @@ class InventoryListing(InventoryConcept):
 
 class ShoppingOptionsResult(BaseModel):
     query: str
+    interpreted_query: str
     curated_products: list[CatalogProduct]
     matched_inventory: list[InventoryListing]
     broader_amazon_search: RetailerOption
@@ -276,7 +278,7 @@ async def lifespan(application):
 
 
 app = FastAPI(
-    title="Paw Pantry Connector API", version="0.13.0", lifespan=lifespan,
+    title="Paw Pantry Connector API", version="0.14.0", lifespan=lifespan,
     description="Stateless pet-supply search and refill estimates for Muse. "
                 "The connector cannot read or write Paw Pantry's private pet workspace. "
                 "Retailer actions open only after the user chooses them, and the supplied "
@@ -449,6 +451,7 @@ SEARCH_ALIASES = {
     "bunny": ("rabbit",), "bunnies": ("rabbit",),
     "parakeet": ("bird",), "cockatiel": ("bird",),
     "guinea": ("guinea-pig",), "cavy": ("guinea-pig",),
+    "hermit": ("hermit-crab",),
     "gecko": ("lizard", "reptile"), "frog": ("amphibian",),
     "toad": ("amphibian",), "mice": ("mouse",), "tortoise": ("turtle",),
     "terrarium": ("reptile", "habitat"), "substrate": ("bedding", "habitat"),
@@ -466,7 +469,7 @@ SEARCH_ALIASES = {
     "probiotic": ("supplements",), "joint": ("supplements",),
     "uvb": ("heating-lighting",), "thermostat": ("heating-lighting",),
     "lamp": ("heating-lighting",), "filter": ("maintenance",),
-    "pump": ("maintenance",),
+    "pump": ("maintenance",), "conditioner": ("water-care",),
     "bed": ("beds",), "mat": ("beds",),
     "crate": ("carriers",), "carrier": ("carriers",),
     "leash": ("leashes",), "harness": ("leashes",), "collar": ("leashes",),
@@ -493,10 +496,52 @@ PRODUCT_TYPE_TITLE_ALIASES = {
     "treat": {"treat", "treats"},
     "treats": {"treat", "treats"},
 }
+SPELLING_VOCABULARY = frozenset(
+    token for token in (
+        set(SEARCH_ALIASES)
+        | KNOWN_SPECIES_TERMS
+        | PRODUCT_TYPE_TERMS
+        | {alias for aliases in SEARCH_ALIASES.values() for alias in aliases}
+    )
+    if "-" not in token and len(token) >= 4
+)
+KNOWN_QUERY_CORRECTIONS = {
+    "aquariam": "aquarium", "aquarim": "aquarium",
+    "carier": "carrier", "chincilla": "chinchilla",
+    "feret": "ferret", "guiena": "guinea", "guinnea": "guinea",
+    "hampster": "hamster", "hamser": "hamster", "hamstar": "hamster",
+    "hedghog": "hedgehog", "kiten": "kitten", "kittten": "kitten",
+    "leesh": "leash", "litrer": "litter", "litterr": "litter",
+    "parkeet": "parakeet", "pupy": "puppy", "puupy": "puppy",
+    "rabit": "rabbit", "rabitt": "rabbit", "reptlie": "reptile",
+    "suplement": "supplement", "tortise": "tortoise",
+}
 
 
 def search_tokens(value: str) -> list[str]:
     return [token for token in re.findall(r"[a-z0-9]+", value.lower())
+            if token not in SEARCH_STOPWORDS]
+
+
+@lru_cache(maxsize=1024)
+def corrected_search_token(token: str) -> str:
+    """Correct one likely typo against the small pet-shopping vocabulary."""
+    if token in KNOWN_QUERY_CORRECTIONS:
+        return KNOWN_QUERY_CORRECTIONS[token]
+    if token in SPELLING_VOCABULARY or len(token) < 5:
+        return token
+    matches = get_close_matches(token, SPELLING_VOCABULARY, n=1, cutoff=0.88)
+    return matches[0] if matches else token
+
+
+def normalized_search_query(value: str) -> str:
+    """Normalize punctuation and high-confidence domain typos without a network call."""
+    return " ".join(corrected_search_token(token)
+                    for token in re.findall(r"[a-z0-9]+", value.lower()))
+
+
+def query_tokens(value: str) -> list[str]:
+    return [token for token in normalized_search_query(value).split()
             if token not in SEARCH_STOPWORDS]
 
 
@@ -510,7 +555,7 @@ def requested_species(tokens: list[str]) -> set[str]:
 
 def product_search_score(product: Product, query: str) -> int:
     """Rank forgiving keyword matches without making suitability claims."""
-    requested = search_tokens(query)
+    requested = query_tokens(query)
     if not requested:
         return 1
     text = " ".join((product.name, product.brand, product.species, product.category,
@@ -530,7 +575,7 @@ def product_search_score(product: Product, query: str) -> int:
             score += 12
         for alias in SEARCH_ALIASES.get(token, ()):
             if alias == product.category:
-                score += 12
+                score += 26
             elif alias in available or alias == product.species:
                 score += 4
         if (token in PRODUCT_TYPE_TERMS
@@ -566,7 +611,7 @@ def inventory_concepts() -> list[dict]:
 
 
 def intent_search_score(intent: dict, query: str) -> int:
-    requested = search_tokens(query)
+    requested = query_tokens(query)
     if not requested:
         return 1
     normalized_query = " ".join(requested)
@@ -599,7 +644,7 @@ def intent_search_score(intent: dict, query: str) -> int:
             score += 12
         for alias in SEARCH_ALIASES.get(token, ()):
             if alias == intent["category"]:
-                score += 12
+                score += 26
             elif alias in available or alias == intent["species"]:
                 score += 4
         if (token in PRODUCT_TYPE_TERMS
@@ -645,13 +690,15 @@ def matching_intents(species: Optional[str], category: Optional[str],
                and (not category or intent["category"] == category.lower())]
     method = "keyword"
     if query_text:
-        lexical = {intent["id"]: intent_search_score(intent, query_text) for intent in intents}
+        normalized_query = normalized_search_query(query_text)
+        lexical = {intent["id"]: intent_search_score(intent, normalized_query)
+                   for intent in intents}
         # Embed only the reviewed base concepts. The thousands of constraint
         # variants inherit their base score, keeping the small-model request fast
         # and inexpensive while lexical ranking distinguishes the variant.
         bases = {intent["id"]: intent_embedding_text(intent) for intent in intents
                  if intent.get("variant_label") is None}
-        semantic = SEMANTIC_RANKER.rank(query_text, bases)
+        semantic = SEMANTIC_RANKER.rank(normalized_query, bases)
         if semantic:
             method = "hybrid-semantic"
             maximum = max(lexical.values(), default=0) or 1
@@ -683,9 +730,12 @@ def matching_products(db: Session, species: Optional[str], category: Optional[st
     products = query.all()
     method = "keyword"
     if query_text:
-        lexical = {product.id: product_search_score(product, query_text) for product in products}
+        normalized_query = normalized_search_query(query_text)
+        lexical = {product.id: product_search_score(product, normalized_query)
+                   for product in products}
         semantic = SEMANTIC_RANKER.rank(
-            query_text, {product.id: product_embedding_text(product) for product in products})
+            normalized_query,
+            {product.id: product_embedding_text(product) for product in products})
         if semantic:
             method = "hybrid-semantic"
             maximum = max(lexical.values(), default=0) or 1
@@ -1102,17 +1152,19 @@ def shopping_options(q: str = Query(min_length=2, max_length=200),
     individually verified variants. The broader Amazon action opens changing search
     results, so the client must not describe it as a specific recommendation.
     """
-    matches, method = matching_products(db, species, category, q, limit)
-    intents, intent_method = matching_intents(species, category, q, limit)
+    interpreted_query = normalized_search_query(q)
+    matches, method = matching_products(db, species, category, interpreted_query, limit)
+    intents, intent_method = matching_intents(species, category, interpreted_query, limit)
     if intent_method == "hybrid-semantic":
         method = intent_method
     products = [product_to_dict(p) for p in matches]
     return {
         "query": q,
+        "interpreted_query": interpreted_query,
         "curated_products": products,
         "matched_inventory": [intent_to_listing(intent) for intent in intents],
         "broader_amazon_search": amazon_search_option(
-            q, species, category,
+            interpreted_query, species, category,
             f"{PUBLIC_BASE_URL}/recommendations?{urlencode({'q': q})}",
             button_label="See more options on Amazon"),
         "matching_method": method,
@@ -1159,7 +1211,8 @@ def connector_tester(q: str = Query(default="", max_length=200),
         "{{QUERY}}": escape(query, quote=True),
         "{{STATUS}}": (
             f'<p><strong>{len(result["curated_products"])} curated matches</strong> '
-            f'using the {escape(result["matching_method"])} matcher.</p>'
+            f'using the {escape(result["matching_method"])} matcher.'
+            f'{(" Interpreted as “" + escape(result["interpreted_query"]) + "”.") if result["interpreted_query"] != query.lower() else ""}</p>'
             if result else
             '<p>Try a request such as “durable chew toy for my puppy.”</p>'
         ),
@@ -1283,7 +1336,7 @@ def muse_openapi():
     ]
     schema = get_openapi(
         title="Paw Pantry Connector API",
-        version="0.13.0",
+        version="0.14.0",
         description=("Stateless pet-supply search and refill estimates for Muse. "
                      "This contract cannot access Paw Pantry's private pet-profile workspace. "
                      "Inventory matches include a first-party Paw Pantry guidance page and a "

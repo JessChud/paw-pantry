@@ -8,19 +8,19 @@ from urllib.parse import parse_qs, urlparse
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_reviewed_amazon_expansion_is_complete_and_synchronized():
+def test_screened_amazon_expansion_is_complete_and_synchronized():
     expansion = json.loads((ROOT / 'data/amazon_product_expansion.json').read_text())
     products = json.loads((ROOT / 'data/seed_products.json').read_text())
     sources = json.loads((ROOT / 'data/catalog_sources.json').read_text())
 
-    assert len(expansion) == 1975
-    assert len({row[0] for row in expansion}) == 1975
+    assert len(expansion) == 3975
+    assert len({row[0] for row in expansion}) == 3975
     assert all(re.fullmatch(r'[A-Z0-9]{10}', row[0]) for row in expansion)
     assert all(len(row) == 4 and all(isinstance(value, str) and value.strip()
                                      for value in row) for row in expansion)
 
-    expansion_products = [product for product in products if 31 <= product['id'] <= 2005]
-    assert len(expansion_products) == 1975
+    expansion_products = [product for product in products if 31 <= product['id'] <= 4005]
+    assert len(expansion_products) == 3975
     for product, (asin, title, species, category) in zip(expansion_products, expansion):
         source = sources[str(product['id'])]
         parsed = urlparse(product['amazon_url'])

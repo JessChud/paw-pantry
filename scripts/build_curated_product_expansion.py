@@ -1,8 +1,9 @@
-"""Synchronize the reviewed Amazon expansion into catalog data.
+"""Synchronize the screened Amazon expansion into catalog data.
 
-The source file contains ASINs and exact displayed titles reviewed from ordinary
-Amazon search results on 2026-09-21. This builder performs no network requests
-and never opens affiliate links.
+The source file contains ASINs and exact displayed titles captured from ordinary
+Amazon public search results and screened for relevance and duplicates on
+2026-09-21. This builder performs no network requests and never opens affiliate
+links.
 """
 from __future__ import annotations
 
@@ -16,8 +17,9 @@ EXPANSION_PATH = ROOT / "data" / "amazon_product_expansion.json"
 PRODUCTS_PATH = ROOT / "data" / "seed_products.json"
 SOURCES_PATH = ROOT / "data" / "catalog_sources.json"
 FIRST_EXPANSION_ID = 31
-EXPECTED_EXPANSION_RECORDS = 1975
+EXPECTED_EXPANSION_RECORDS = 3975
 MANUALLY_REVIEWED_RECORDS = 491
+PREVIOUSLY_REVIEWED_RECORDS = 1975
 CHECKED_DATE = "2026-09-21"
 AFFILIATE_TAG = "pawpantry-20"
 FORMAT_SOURCE = "https://affiliate-program.amazon.com/help/node/topic/GJMMT7G4C8K4Y3AY"
@@ -30,7 +32,7 @@ def build() -> None:
 
     if len(expansion) != EXPECTED_EXPANSION_RECORDS:
         raise SystemExit(
-            f"Expected exactly {EXPECTED_EXPANSION_RECORDS} reviewed products; found {len(expansion)}"
+            f"Expected exactly {EXPECTED_EXPANSION_RECORDS} screened products; found {len(expansion)}"
         )
 
     existing_products = [p for p in products if p["id"] < FIRST_EXPANSION_ID]
@@ -72,11 +74,21 @@ def build() -> None:
             "amazon_url": f"https://www.amazon.com/dp/{asin}/ref=nosim?tag={AFFILIATE_TAG}",
             "chewy_url": "",
         })
-        link_source = (
-            "Amazon search listing reviewed September 21, 2026; ASIN and displayed title recorded manually."
-            if offset < MANUALLY_REVIEWED_RECORDS else
-            "Amazon public search listing reviewed September 21, 2026; ASIN and displayed title retained in the reviewed expansion file."
-        )
+        if offset < MANUALLY_REVIEWED_RECORDS:
+            link_source = (
+                "Amazon search listing reviewed September 21, 2026; "
+                "ASIN and displayed title recorded manually."
+            )
+        elif offset < PREVIOUSLY_REVIEWED_RECORDS:
+            link_source = (
+                "Amazon public search listing reviewed September 21, 2026; "
+                "ASIN and displayed title retained in the reviewed expansion file."
+            )
+        else:
+            link_source = (
+                "Amazon public search result captured September 21, 2026; "
+                "ASIN and displayed title screened for relevance and duplicates before publication."
+            )
         new_sources[str(product_id)] = {
             "amazon_asin": asin,
             "amazon_product_url": f"https://www.amazon.com/dp/{asin}",
@@ -98,7 +110,7 @@ def build() -> None:
     SOURCES_PATH.write_text(
         json.dumps(retained_sources | new_sources, indent=2, ensure_ascii=False) + "\n"
     )
-    print(f"Wrote {len(existing_products) + len(new_products)} stable product records, including {len(new_products)} reviewed expansion products.")
+    print(f"Wrote {len(existing_products) + len(new_products)} stable product records, including {len(new_products)} screened expansion products.")
 
 
 if __name__ == "__main__":

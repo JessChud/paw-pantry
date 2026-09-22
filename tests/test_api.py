@@ -291,7 +291,7 @@ def test_public_connector_tester_uses_real_results_without_exposing_credentials(
 
 
 @pytest.mark.parametrize(('query', 'expected_product_species', 'expected_intent'), [
-    ('terrarium substrate for leopard gecko', 'reptile', 'Reptile substrate'),
+    ('terrarium substrate for leopard gecko', 'lizard', 'Reptile substrate'),
     ('hay for my rabbit', 'rabbit', 'Timothy hay'),
     ('cage cleaner for my bird', 'bird', 'Cage cleaning brush'),
     ('indestructible toy for a power chewer', 'dog', 'Durable chew toy'),
@@ -358,27 +358,27 @@ def test_catalog_stats_are_honest_and_public(api):
     client.headers.pop('X-API-Key')
     module.catalog_metadata.cache_clear()
     stats = client.get('/catalog-stats').json()
-    assert stats['active_curated_products'] == 2000
+    assert stats['active_curated_products'] == 4000
     assert stats['retired_products'] == 5
     assert stats['shopping_intents'] == 2771
-    assert stats['verified_amazon_products'] == 1998
-    assert stats['affiliate_enabled_active_products'] == 2000
+    assert stats['verified_amazon_products'] == 3998
+    assert stats['affiliate_enabled_active_products'] == 4000
     assert stats['affiliate_enabled_intents'] == 2771
     assert stats['verified_chewy_products'] == 0
-    assert stats['species_counts']['dog'] == 388
-    assert stats['species_counts']['cat'] == 329
-    assert stats['species_counts']['fish'] == 164
-    assert stats['species_counts']['bird'] == 138
-    assert stats['species_counts']['ferret'] == 76
-    assert stats['species_counts']['hermit-crab'] == 57
-    assert stats['species_counts']['gerbil'] == 43
-    assert stats['species_counts']['mouse'] == 49
-    assert stats['species_counts']['amphibian'] == 44
-    assert stats['category_counts']['food'] == 460
-    assert stats['category_counts']['toys'] == 150
-    assert stats['category_counts']['habitat'] == 330
-    assert stats['category_counts']['supplements'] == 98
-    assert stats['category_counts']['heating-lighting'] == 66
+    assert stats['species_counts']['dog'] == 776
+    assert stats['species_counts']['cat'] == 658
+    assert stats['species_counts']['fish'] == 328
+    assert stats['species_counts']['bird'] == 276
+    assert stats['species_counts']['ferret'] == 152
+    assert stats['species_counts']['hermit-crab'] == 114
+    assert stats['species_counts']['gerbil'] == 86
+    assert stats['species_counts']['mouse'] == 98
+    assert stats['species_counts']['amphibian'] == 88
+    assert stats['category_counts']['food'] == 827
+    assert stats['category_counts']['toys'] == 341
+    assert stats['category_counts']['habitat'] == 614
+    assert stats['category_counts']['supplements'] == 191
+    assert stats['category_counts']['heating-lighting'] == 149
     assert stats['shopping_species_counts']['dog'] == 473
     assert stats['shopping_species_counts']['guinea-pig'] == 66
     assert stats['shopping_species_counts']['ferret'] == 159
@@ -424,9 +424,9 @@ def test_inventory_is_product_type_coverage_not_fake_retail_stock(api):
 def test_every_active_product_and_inventory_concept_has_affiliate_path(api):
     client, _ = api
     products = all_products(client)
-    assert len(products) == 2000
+    assert len(products) == 4000
     assert all(product['amazon_link_available'] for product in products)
-    assert sum(product['verified_amazon_product_link'] for product in products) == 1998
+    assert sum(product['verified_amazon_product_link'] for product in products) == 3998
     assert sum(product['affiliate_search_available'] for product in products) == 2
     assert all(any(option['retailer'] == 'amazon' and option['affiliate']
                    for option in product['retailer_options']) for product in products)
